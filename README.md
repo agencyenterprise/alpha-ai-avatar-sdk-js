@@ -7,6 +7,8 @@ Hello! 👋 This tutorial will help you get started with the **Avatar SDK for JS
 - [Getting Started](#getting-started)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+    - [NPM](#npm)
+    - [Minified JS](#minified-js)
   - [Usage](#usage)
     - [Importing and Initializing](#importing-and-initializing)
       - [Available Options](#available-options)
@@ -15,11 +17,23 @@ Hello! 👋 This tutorial will help you get started with the **Avatar SDK for JS
 
 ## Installation
 
+### NPM
+
 To install the package, run the following command:
 
 ```bash
 npm i alpha-ai-avatar-sdk-js
 ```
+
+### Minified JS
+
+To use the SDK without a package manager, you can include it with a script tag:
+
+```javascript
+<script src='https://unpkg.com/alpha-ai-avatar-sdk-js/index.js'></script>
+```
+
+The module will be exported under `Avatar` in the global namespace. When accessing symbols from the class, you'd need to prefix them with `Avatar.` For example, `AvatarClient` becomes `Avatar.AvatarClient`.
 
 ## Usage
 
