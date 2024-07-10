@@ -1,5 +1,7 @@
 # Getting Started
 
+[![npm version](https://badge.fury.io/js/alpha-ai-avatar-sdk-js.svg)](https://badge.fury.io/js/alpha-ai-avatar-sdk-js)
+
 Hello! 👋 This tutorial will help you get started with the **Avatar SDK for JS**.
 
 ## Table of Contents
