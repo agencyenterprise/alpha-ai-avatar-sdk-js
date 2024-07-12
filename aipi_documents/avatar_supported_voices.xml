@@ -1,0 +1,329 @@
+<supported-voices>
+  <language code="en-AU">
+    <country>Australia</country>
+    <voices>
+      <voice>
+        <name>Natasha</name>
+        <id>en-AU-NatashaNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>William</name>
+        <id>en-AU-WilliamNeural</id>
+        <gender>Male</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Annette</name>
+        <id>en-AU-AnnetteNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Carly</name>
+        <id>en-AU-CarlyNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Darren</name>
+        <id>en-AU-DarrenNeural</id>
+        <gender>Male</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Duncan</name>
+        <id>en-AU-DuncanNeural</id>
+        <gender>Male</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Elsie</name>
+        <id>en-AU-ElsieNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Freya</name>
+        <id>en-AU-FreyaNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Joanne</name>
+        <id>en-AU-JoanneNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Ken</name>
+        <id>en-AU-KenNeural</id>
+        <gender>Male</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Kim</name>
+        <id>en-AU-KimNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Neil</name>
+        <id>en-AU-NeilNeural</id>
+        <gender>Male</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Tim</name>
+        <id>en-AU-TimNeural</id>
+        <gender>Male</gender>
+        <locale>en-AU</locale>
+      </voice>
+      <voice>
+        <name>Tina</name>
+        <id>en-AU-TinaNeural</id>
+        <gender>Female</gender>
+        <locale>en-AU</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-CA">
+    <country>Canada</country>
+    <voices>
+      <voice>
+        <name>Clara</name>
+        <id>en-CA-ClaraNeural</id>
+        <gender>Female</gender>
+        <locale>en-CA</locale>
+      </voice>
+      <voice>
+        <name>Liam</name>
+        <id>en-CA-LiamNeural</id>
+        <gender>Male</gender>
+        <locale>en-CA</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-GB">
+    <country>United Kingdom</country>
+    <voices>
+      <voice>
+        <name>Sonia</name>
+        <id>en-GB-SoniaNeural</id>
+        <gender>Female</gender>
+        <locale>en-GB</locale>
+        <styles>
+          <style>cheerful</style>
+          <style>sad</style>
+        </styles>
+      </voice>
+      <voice>
+        <name>Ryan</name>
+        <id>en-GB-RyanNeural</id>
+        <gender>Male</gender>
+        <locale>en-GB</locale>
+        <styles>
+          <style>cheerful</style>
+          <style>chat</style>
+        </styles>
+      </voice>
+      <!-- Additional en-GB voices... -->
+    </voices>
+  </language>
+  
+  <language code="en-HK">
+    <country>Hong Kong</country>
+    <voices>
+      <voice>
+        <name>Yan</name>
+        <id>en-HK-YanNeural</id>
+        <gender>Female</gender>
+        <locale>en-HK</locale>
+      </voice>
+      <voice>
+        <name>Sam</name>
+        <id>en-HK-SamNeural</id>
+        <gender>Male</gender>
+        <locale>en-HK</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-IE">
+    <country>Ireland</country>
+    <voices>
+      <voice>
+        <name>Emily</name>
+        <id>en-IE-EmilyNeural</id>
+        <gender>Female</gender>
+        <locale>en-IE</locale>
+      </voice>
+      <voice>
+        <name>Connor</name>
+        <id>en-IE-ConnorNeural</id>
+        <gender>Male</gender>
+        <locale>en-IE</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-IN">
+    <country>India</country>
+    <voices>
+      <voice>
+        <name>Neerja</name>
+        <id>en-IN-NeerjaNeural</id>
+        <gender>Female</gender>
+        <locale>en-IN</locale>
+        <styles>
+          <style>newscast</style>
+          <style>cheerful</style>
+          <style>empathetic</style>
+        </styles>
+      </voice>
+      <!-- Additional en-IN voices... -->
+    </voices>
+  </language>
+  
+  <language code="en-KE">
+    <country>Kenya</country>
+    <voices>
+      <voice>
+        <name>Asilia</name>
+        <id>en-KE-AsiliaNeural</id>
+        <gender>Female</gender>
+        <locale>en-KE</locale>
+      </voice>
+      <voice>
+        <name>Chilemba</name>
+        <id>en-KE-ChilembaNeural</id>
+        <gender>Male</gender>
+        <locale>en-KE</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-NG">
+    <country>Nigeria</country>
+    <voices>
+      <voice>
+        <name>Ezinne</name>
+        <id>en-NG-EzinneNeural</id>
+        <gender>Female</gender>
+        <locale>en-NG</locale>
+      </voice>
+      <voice>
+        <name>Abeo</name>
+        <id>en-NG-AbeoNeural</id>
+        <gender>Male</gender>
+        <locale>en-NG</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-NZ">
+    <country>New Zealand</country>
+    <voices>
+      <voice>
+        <name>Molly</name>
+        <id>en-NZ-MollyNeural</id>
+        <gender>Female</gender>
+        <locale>en-NZ</locale>
+      </voice>
+      <voice>
+        <name>Mitchell</name>
+        <id>en-NZ-MitchellNeural</id>
+        <gender>Male</gender>
+        <locale>en-NZ</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-PH">
+    <country>Philippines</country>
+    <voices>
+      <voice>
+        <name>Rosa</name>
+        <id>en-PH-RosaNeural</id>
+        <gender>Female</gender>
+        <locale>en-PH</locale>
+      </voice>
+      <voice>
+        <name>James</name>
+        <id>en-PH-JamesNeural</id>
+        <gender>Male</gender>
+        <locale>en-PH</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-SG">
+    <country>Singapore</country>
+    <voices>
+      <voice>
+        <name>Luna</name>
+        <id>en-SG-LunaNeural</id>
+        <gender>Female</gender>
+        <locale>en-SG</locale>
+      </voice>
+      <voice>
+        <name>Wayne</name>
+        <id>en-SG-WayneNeural</id>
+        <gender>Male</gender>
+        <locale>en-SG</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-TZ">
+    <country>Tanzania</country>
+    <voices>
+      <voice>
+        <name>Imani</name>
+        <id>en-TZ-ImaniNeural</id>
+        <gender>Female</gender>
+        <locale>en-TZ</locale>
+      </voice>
+      <voice>
+        <name>Elimu</name>
+        <id>en-TZ-ElimuNeural</id>
+        <gender>Male</gender>
+        <locale>en-TZ</locale>
+      </voice>
+    </voices>
+  </language>
+  
+  <language code="en-US">
+    <country>United States</country>
+    <voices>
+      <voice>
+        <name>Ava Multilingual</name>
+        <id>en-US-AvaMultilingualNeural</id>
+        <gender>Female</gender>
+        <locale>en-US</locale>
+      </voice>
+      <!-- Additional en-US voices... -->
+    </voices>
+  </language>
+  
+  <language code="en-ZA">
+    <country>South Africa</country>
+    <voices>
+      <voice>
+        <name>Leah</name>
+        <id>en-ZA-LeahNeural</id>
+        <gender>Female</gender>
+        <locale>en-ZA</locale>
+      </voice>
+      <voice>
+        <name>Luke</name>
+        <id>en-ZA-LukeNeural</id>
+        <gender>Male</gender>
+        <locale>en-ZA</locale>
+      </voice>
+    </voices>
+  </language>
+</supported-voices>
