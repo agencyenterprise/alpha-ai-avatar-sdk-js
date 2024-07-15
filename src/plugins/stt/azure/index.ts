@@ -1,0 +1,1 @@
+export { AzureSpeechRecognition } from './AzureSpeechRecognition';
