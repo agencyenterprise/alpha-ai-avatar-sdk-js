@@ -172,7 +172,9 @@ export const App = () => {
 
     console.log(content);
     setPrompt((prev) => [...prev, { role: 'user', content }]);
-    currentSpeaker === 2 ? setCurrentSpeaker(4) : setCurrentSpeaker(2);
+    currentSpeaker === CLIENT_A
+      ? setCurrentSpeaker(CLIENT_B)
+      : setCurrentSpeaker(CLIENT_A);
     sleep(500);
   };
 
