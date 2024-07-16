@@ -8,4 +8,4 @@ export { AvatarClient } from './core/AvatarClient';
 export { Room, RoomEvent, Track, RemoteTrack } from 'livekit-client';
 
 // Plugins
-export { AzureSpeechRecognition } from './plugins';
+export { AzureSpeechRecognition, OpenAIClient } from './plugins';
