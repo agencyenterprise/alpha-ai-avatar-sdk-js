@@ -7,3 +7,4 @@ export {
   ClaudeUsage,
   ClaudeContent,
 } from './llm/claude';
+export { Debate } from './ext/debate/Debate';
