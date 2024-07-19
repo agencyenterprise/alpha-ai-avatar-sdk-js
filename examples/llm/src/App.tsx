@@ -65,7 +65,7 @@ export function App() {
         },
       ],
     );
-    // avatar.say(claudeResponse.content[0].text);
+    avatar.say(claudeResponse.content[0].text);
   }
 
   return (
