@@ -1,1 +1,7 @@
-export { ClaudeAIClient, MessageParam } from './ClaudeAIClient';
+export {
+  ClaudeAIClient,
+  MessageParam,
+  ClaudeResponse,
+  ClaudeUsage,
+  ClaudeContent,
+} from './ClaudeAIClient';

@@ -13,4 +13,7 @@ export {
   OpenAIClient,
   ClaudeAIClient,
   MessageParam,
+  ClaudeResponse,
+  ClaudeUsage,
+  ClaudeContent,
 } from './plugins';
