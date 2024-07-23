@@ -2,12 +2,9 @@ import {
   AvatarClient,
   OpenAIClient,
   ClaudeAIClient,
-  RemoteTrack,
-  Room,
-  RoomEvent,
 } from 'alpha-ai-avatar-sdk-js';
 import { Button } from './Button';
-import React, { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const avatar = new AvatarClient({
   apiKey: 'API_KEY',
@@ -24,46 +21,39 @@ const claude = new ClaudeAIClient({
 });
 
 export function App() {
-  const [room, setRoom] = React.useState<Room>();
+  const prompt: { role: 'user' | 'assistant'; content: string }[] = [
+    {
+      role: 'user',
+      content: `Hello, how are you doing?`,
+    },
+  ];
 
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const [isConnected, setIsConnected] = useState(avatar.isConnected);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (room) {
-      room
-        .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
-          if (track.kind === 'video') {
-            track.attach(videoRef.current!);
-          } else if (track.kind === 'audio') {
-            track.attach(audioRef.current!);
-          }
-        })
-        .on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack) => {
-          track.detach();
-        });
+    if (videoRef.current && audioRef.current) {
+      avatar.init(videoRef.current, audioRef.current);
     }
-  }, [room]);
+    return () => {
+      avatar.disconnect();
+    };
+  }, []);
 
   async function sayOpenAIResponse() {
-    const openAIResponse = await openai.getCompletions('alpha-avatar-gpt-4o', [
-      {
-        role: 'user',
-        content: `Hello, how are you doing?`,
-      },
-    ]);
+    const openAIResponse = await openai.getCompletions(
+      'alpha-avatar-gpt-4o',
+      prompt,
+    );
     avatar.say(openAIResponse);
   }
 
   async function sayClaudeResponse() {
     const claudeResponse = await claude.getCompletions(
       'claude-3-opus-20240229',
-      [
-        {
-          role: 'user',
-          content: `Hello, how are you doing?`,
-        },
-      ],
+      prompt,
     );
     avatar.say(claudeResponse.content[0].text);
   }
@@ -80,7 +70,7 @@ export function App() {
       <audio ref={audioRef} style={{ display: 'none' }} autoPlay muted />
 
       <div style={{ display: 'flex', gap: '10px' }}>
-        {room ? (
+        {isConnected ? (
           <>
             <Button onClick={sayOpenAIResponse}>Say OpenAI Response</Button>
             <Button onClick={sayClaudeResponse}>Say Claude Response</Button>
@@ -91,16 +81,9 @@ export function App() {
               Stop
             </Button>
             <Button
-              onClick={async () => {
-                const newAvatar = await avatar.switchAvatar(4);
-                setRoom(newAvatar);
-              }}>
-              Switch
-            </Button>
-            <Button
               onClick={() => {
                 avatar.disconnect();
-                setRoom(undefined);
+                setIsConnected(false);
               }}>
               Disconnect
             </Button>
@@ -108,8 +91,8 @@ export function App() {
         ) : (
           <Button
             onClick={async () => {
-              const newRoom = await avatar.connect();
-              setRoom(newRoom);
+              await avatar.connect();
+              setIsConnected(true);
             }}>
             Connect
           </Button>

@@ -1,20 +1,34 @@
 import { HTTPClient } from './HTTPClient';
-import { Room } from 'livekit-client';
+import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
 import {
   AvatarClientConfig,
   CreateRoomResponse,
   GetAvatarsResponse,
   GetSupportedVoicesResponse,
+  MessageState,
+  MessageType,
+  ParsedMessage,
   SayOptions,
 } from './types';
 
 export class AvatarClient extends HTTPClient {
   private room?: Room;
   private avatarId?: number;
+  private isAvatarSpeaking: boolean = false;
+  private availableAvatars: GetAvatarsResponse = [];
+
+  private videoElement?: HTMLVideoElement;
+  private audioElement?: HTMLAudioElement;
 
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
     this.avatarId = config.avatarId;
+  }
+
+  async init(videoElement: HTMLVideoElement, audioElement: HTMLAudioElement) {
+    this.videoElement = videoElement;
+    this.audioElement = audioElement;
+    await this.fetchAvatars();
   }
 
   async connect(avatarId?: number) {
@@ -24,7 +38,20 @@ export class AvatarClient extends HTTPClient {
     const room = new Room({ adaptiveStream: true });
     room.connect(serverUrl, token);
     this.room = room;
+    this.setupRoomListeners();
     return room;
+  }
+
+  get avatars() {
+    return this.availableAvatars;
+  }
+
+  get isConnected() {
+    return !!this.room;
+  }
+
+  get isSpeaking() {
+    return this.isAvatarSpeaking;
   }
 
   getAvatars() {
@@ -40,16 +67,57 @@ export class AvatarClient extends HTTPClient {
   }
 
   stop() {
+    this.isAvatarSpeaking = false;
     this.sendMessage({ message: '', avatarAction: 1 });
   }
 
   switchAvatar(avatarId: number) {
     this.disconnect();
+    this.avatarId = avatarId;
     return this.connect(avatarId);
   }
 
   disconnect() {
     this.room?.disconnect();
+    this.room = undefined;
+  }
+
+  onAvatarSpeaking(callback: (isSpeaking: boolean) => void) {
+    this.room?.on(RoomEvent.DataReceived, (data: Uint8Array) => {
+      const decoder = new TextDecoder();
+      const message: ParsedMessage = JSON.parse(decoder.decode(data));
+      if (message.type === MessageType.State) {
+        const isAvatarSpeaking = message.data.state === MessageState.Speaking;
+        this.isAvatarSpeaking = isAvatarSpeaking;
+        callback(isAvatarSpeaking);
+      }
+    });
+  }
+
+  private setupRoomListeners() {
+    if (!this.room) return;
+
+    this.room
+      .on(RoomEvent.TrackSubscribed, this.handleTrackSubscribed.bind(this))
+      .on(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed.bind(this));
+  }
+
+  private handleTrackSubscribed(track: RemoteTrack) {
+    if (track.kind === 'video' && this.videoElement) {
+      track.attach(this.videoElement);
+    } else if (track.kind === 'audio' && this.audioElement) {
+      track.attach(this.audioElement);
+    }
+  }
+
+  private handleTrackUnsubscribed(track: RemoteTrack) {
+    track.detach();
+  }
+
+  private async fetchAvatars() {
+    const response = await this.getAvatars();
+    this.availableAvatars = response;
+    return this.availableAvatars;
   }
 
   private async sendMessage(message: any) {

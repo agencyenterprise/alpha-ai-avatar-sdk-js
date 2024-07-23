@@ -63,40 +63,28 @@ const client = new AvatarClient({ apiKey: 'YOUR_API_KEY' });
 Example of a code integrating with a React app.
 
 ```javascript
-import {
-  AvatarClient,
-  RemoteTrack,
-  Room,
-  RoomEvent,
-} from 'alpha-ai-avatar-sdk-js';
+import { AvatarClient } from 'alpha-ai-avatar-sdk-js';
 import { Button } from './Button';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const avatar = new AvatarClient({
   apiKey: 'API_KEY',
 });
 
 export function App() {
-  const [room, setRoom] = React.useState<Room>();
+  const [isConnected, setIsConnected] = useState(avatar.isConnected);
 
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const videoRef = React.useRef < HTMLVideoElement > null;
+  const audioRef = React.useRef < HTMLAudioElement > null;
 
   useEffect(() => {
-    if (room) {
-      room
-        .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
-          if (track.kind === 'video') {
-            track.attach(videoRef.current!);
-          } else if (track.kind === 'audio') {
-            track.attach(audioRef.current!);
-          }
-        })
-        .on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack) => {
-          track.detach();
-        });
+    if (videoRef.current && audioRef.current) {
+      avatar.init(videoRef.current, audioRef.current);
     }
-  }, [room]);
+    return () => {
+      avatar.disconnect();
+    };
+  }, []);
 
   return (
     <div
@@ -110,8 +98,16 @@ export function App() {
       <audio ref={audioRef} style={{ display: 'none' }} autoPlay muted />
 
       <div style={{ display: 'flex', gap: '10px' }}>
-        {room ? (
+        {isConnected ? (
           <>
+            <select
+              onChange={(e) => avatar.switchAvatar(Number(e.target.value))}>
+              {avatar.avatars.map((avatar) => (
+                <option key={avatar.id} value={avatar.id}>
+                  {avatar.name}
+                </option>
+              ))}
+            </select>
             <Button onClick={() => avatar.say("Hello, I'm a robot!")}>
               Say
             </Button>
@@ -122,16 +118,9 @@ export function App() {
               Stop
             </Button>
             <Button
-              onClick={async () => {
-                const newAvatar = await avatar.switchAvatar(4);
-                setRoom(newAvatar);
-              }}>
-              Switch
-            </Button>
-            <Button
               onClick={() => {
                 avatar.disconnect();
-                setRoom(undefined);
+                setIsConnected(false);
               }}>
               Disconnect
             </Button>
@@ -139,8 +128,8 @@ export function App() {
         ) : (
           <Button
             onClick={async () => {
-              const newRoom = await avatar.connect();
-              setRoom(newRoom);
+              await avatar.connect();
+              setIsConnected(true);
             }}>
             Connect
           </Button>
