@@ -1,5 +1,5 @@
 {
-  "name": "debate-ext-example",
+  "name": "debate-example",
   "version": "0.0.1",
   "scripts": {
     "start": "react-scripts start",

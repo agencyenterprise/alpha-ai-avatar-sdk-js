@@ -1,7 +1,7 @@
-import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
 import { AvatarClient } from '../../../core/AvatarClient';
 import { OpenAIClient } from '../../llm/openai';
-import { GetAvatarsResponse } from '../../../core/types';
+import { GetAvatarsResponse, Prompt } from '../../../core/types';
+import { getFirstSpeakerPrompt } from './utils';
 
 export type DebateOptions = {
   apiKey: string;
@@ -11,29 +11,25 @@ export type DebateOptions = {
 };
 
 export class Debate {
-  apiKey: string = '';
-  baseUrl: string = '';
-  openAIApiKey: string = '';
-  openAIResourceName: string = '';
+  private apiKey: string;
+  private baseUrl: string;
+  private openAIApiKey: string;
+  private openAIResourceName: string;
 
-  openAIClient: OpenAIClient | null = null;
-  avatarClientA: AvatarClient | null = null;
-  avatarClientB: AvatarClient | null = null;
-  roomA: Room | null = null;
-  roomB: Room | null = null;
+  private openAIClient: OpenAIClient | null = null;
+  private avatarClientA: AvatarClient | null = null;
+  private avatarClientB: AvatarClient | null = null;
 
-  debateTheme = '';
-  debateHistory: any = [];
-  debateStarted: boolean = false;
-  isAvatarSpeaking: boolean = false;
-  currentSpeaker: string | null = 'A';
-  prompt = [{ role: 'system', content: '' }];
-  avatars: GetAvatarsResponse = [];
+  private debateTheme: string = '';
+  private debateHistory: any = [];
 
-  onDebateHistoryUpdate:
-    | ((debateHistory: [{ speaker: string; content: string }] | []) => void)
-    | undefined;
-  onAvatarSpeakingChange: ((isAvatarSpeaking: boolean) => void) | undefined;
+  private currentSpeaker: string = 'A';
+  private avatarsAvailable: GetAvatarsResponse = [];
+
+  private prompt: Prompt[] = [];
+
+  onDebateHistoryChange?: (debateHistory: any) => void;
+  onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
 
   constructor(options: DebateOptions) {
     this.apiKey = options.apiKey;
@@ -54,7 +50,12 @@ export class Debate {
     });
 
     const avatars = await tempClient.getAvatars();
-    this.avatars = avatars;
+    this.avatarsAvailable = avatars;
+    tempClient.disconnect();
+  }
+
+  get avatars() {
+    return this.avatarsAvailable;
   }
 
   setAvatarA(avatarId: number) {
@@ -84,113 +85,88 @@ export class Debate {
     audioRefB: HTMLAudioElement,
   ) {
     if (this.avatarClientA && this.avatarClientB) {
-      this.roomA = await this.avatarClientA.connect();
-      this.roomB = await this.avatarClientB.connect();
-      this.setupRoomListeners(this.roomA, videoRefA, audioRefA);
-      this.setupRoomListeners(this.roomB, videoRefB, audioRefB);
+      this.avatarClientA.init(videoRefA, audioRefA);
+      this.avatarClientB.init(videoRefB, audioRefB);
+
+      await this.avatarClientA.connect();
+      await this.avatarClientB.connect();
+
+      this.avatarClientA.onAvatarSpeakingChange = (isSpeaking) => {
+        this.onAvatarSpeakingChange && this.onAvatarSpeakingChange(isSpeaking);
+      };
+
+      this.avatarClientB.onAvatarSpeakingChange = (isSpeaking) => {
+        this.onAvatarSpeakingChange && this.onAvatarSpeakingChange(isSpeaking);
+      };
+
       this.currentSpeaker = 'A';
     }
   }
 
-  getAvatars() {
-    return this.avatars;
-  }
-
-  setupRoomListeners(
-    room: Room,
-    videoRef: HTMLVideoElement,
-    audioRef: HTMLAudioElement,
-  ) {
-    room
-      .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
-        if (track.kind === 'video') {
-          track.attach(videoRef);
-        } else if (track.kind === 'audio') {
-          track.attach(audioRef);
-        }
-      })
-      .on(RoomEvent.DataReceived, (data) => {
-        const parsedMessage = JSON.parse(new TextDecoder().decode(data));
-        if (parsedMessage.type === 1) {
-          this.isAvatarSpeaking = parsedMessage.data.state === 2;
-          if (this.onAvatarSpeakingChange) {
-            this.onAvatarSpeakingChange(this.isAvatarSpeaking);
-          }
-        }
-      })
-      .on(RoomEvent.TrackUnsubscribed, (track) => {
-        track.detach();
-      });
-  }
-
-  startDebate() {
-    this.debateStarted = true;
-    this.prompt = [{ role: 'system', content: '' }];
-    this.debateHistory = [];
-    this.debate();
-  }
-
   async debate() {
-    if (
-      !this.openAIClient ||
-      !this.debateStarted ||
-      this.avatarClientA === null ||
-      this.avatarClientB === null
-    )
-      return;
-
-    const currentAvatar =
+    const avatar =
       this.currentSpeaker === 'A' ? this.avatarClientA : this.avatarClientB;
     const role = this.currentSpeaker === 'A' ? 'affirmative' : 'negative';
 
-    const content = await this.openAIClient.getCompletions(
+    const content = await this.openAIClient?.getCompletions(
       'alpha-avatar-gpt-4o',
       [
-        {
-          role: 'system',
-          content: `You are in a debate where you are supporting the ${role} side of the topic: 
-          "${this.debateTheme}". ${this.currentSpeaker === 'A' ? 'Please ask the first question and wait for our opponent response to continue the debate.' : 'Please reply to the first question and wait for our opponent response to continue the debate.'} The questions and 
-          answers should be related to the topic and should be in a debate format.
-          Important: Only return the data I need to say, nothing more.`,
-        },
+        getFirstSpeakerPrompt(this.currentSpeaker, this.debateTheme, role),
         ...this.prompt,
       ],
     );
 
-    currentAvatar.say(content);
+    if (!content || !avatar) {
+      return;
+    }
+
+    avatar.say(content);
 
     this.prompt.push({ role: 'user', content });
     this.debateHistory.push({ speaker: this.currentSpeaker, content });
 
-    if (this.onDebateHistoryUpdate) {
-      this.onDebateHistoryUpdate(this.debateHistory);
+    if (this.onDebateHistoryChange) {
+      this.onDebateHistoryChange(this.debateHistory);
     }
 
     this.currentSpeaker = this.currentSpeaker === 'A' ? 'B' : 'A';
   }
-}
 
-// Usage example:
-// const debate = new Debate({
-//   apiKey: "YOUR_API_KEY",
-//   baseUrl: "https://staging.avatar.alpha.school",
-//   openAIApiKey: "YOUR_OPENAI_API_KEY",
-//   openAIResourceName: "alpha-school-avatar-openai-westus"
-// });
-//
-// debate.onDebateHistoryUpdate = (history) => {
-//   // Update UI with debate history
-// };
-//
-// debate.onAvatarSpeakingChange = (isSpeaking) => {
-//   // Update UI to reflect speaking state
-// };
-//
-// Returns an array of avatars available
-// const avatars = debate.getAvatars();
-// // Set up the debate
-// debate.setAvatarA(avatarAId);
-// debate.setAvatarB(avatarBId);
-// debate.setDebateTheme("Is AI killing human jobs?");
-// await debate.connectAvatars(videoRefA, audioRefA, videoRefB, audioRefB);
-// debate.startDebate();
+  stop() {
+    if (this.avatarClientA && this.avatarClientB) {
+      this.clearState();
+      this.stopAvatars();
+      this.disconnectAvatars();
+    }
+  }
+
+  disconnect() {
+    if (this.avatarClientA && this.avatarClientB) {
+      this.stop();
+      this.clearState();
+      this.avatarClientA.disconnect();
+      this.avatarClientB.disconnect();
+    }
+  }
+
+  private clearState() {
+    this.currentSpeaker = 'A';
+    this.debateTheme = '';
+    this.debateHistory = [];
+    this.prompt = [];
+  }
+
+  private stopAvatars() {
+    if (this.avatarClientA && this.avatarClientB) {
+      this.avatarClientA.stop();
+      this.avatarClientB.stop();
+    }
+  }
+
+  private disconnectAvatars() {
+    if (this.avatarClientA && this.avatarClientB) {
+      this.avatarClientA.disconnect();
+      this.avatarClientB.disconnect();
+    }
+  }
+}

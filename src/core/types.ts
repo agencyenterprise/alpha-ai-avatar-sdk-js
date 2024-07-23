@@ -58,3 +58,8 @@ export type ParsedMessage = {
   };
   type: MessageType;
 };
+
+export type Prompt = {
+  role: string;
+  content: string;
+};
