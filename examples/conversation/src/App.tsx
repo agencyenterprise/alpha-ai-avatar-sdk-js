@@ -1,12 +1,6 @@
-import {
-  AvatarClient,
-  AzureSpeechRecognition,
-  RemoteTrack,
-  Room,
-  RoomEvent,
-} from 'alpha-ai-avatar-sdk-js';
+import { AvatarClient, AzureSpeechRecognition } from 'alpha-ai-avatar-sdk-js';
 import { Button } from './Button';
-import React, { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const avatar = new AvatarClient({
   apiKey: 'API_KEY',
@@ -15,35 +9,30 @@ const avatar = new AvatarClient({
 const stt = new AzureSpeechRecognition();
 
 export function App() {
-  const [room, setRoom] = React.useState<Room>();
+  const [isConnected, setIsConnected] = useState(avatar.isConnected);
 
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (room) {
-      room
-        .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
-          if (track.kind === 'video') {
-            track.attach(videoRef.current!);
-          } else if (track.kind === 'audio') {
-            track.attach(audioRef.current!);
-          }
-        })
-        .on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack) => {
-          track.detach();
-        });
+    if (videoRef.current && audioRef.current) {
+      avatar.init(videoRef.current, audioRef.current);
+    }
 
+    return () => {
+      stt.stop();
+      avatar.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isConnected) {
       stt.start('SUBSCRIPTION_KEY', 'REGION', (transcript) => {
         avatar.say(transcript);
         console.log(transcript);
       });
     }
-
-    return () => {
-      stt.stop();
-    };
-  }, [room]);
+  }, [isConnected]);
 
   return (
     <div
@@ -57,7 +46,7 @@ export function App() {
       <audio ref={audioRef} style={{ display: 'none' }} autoPlay muted />
 
       <div style={{ display: 'flex', gap: '10px' }}>
-        {room ? (
+        {isConnected ? (
           <>
             <Button onClick={() => avatar.say("Hello, I'm a robot!")}>
               Say
@@ -70,15 +59,15 @@ export function App() {
             </Button>
             <Button
               onClick={async () => {
-                const newAvatar = await avatar.switchAvatar(4);
-                setRoom(newAvatar);
+                await avatar.switchAvatar(20);
+                setIsConnected(true);
               }}>
               Switch
             </Button>
             <Button
               onClick={() => {
                 avatar.disconnect();
-                setRoom(undefined);
+                setIsConnected(false);
               }}>
               Disconnect
             </Button>
@@ -86,8 +75,8 @@ export function App() {
         ) : (
           <Button
             onClick={async () => {
-              const newRoom = await avatar.connect();
-              setRoom(newRoom);
+              await avatar.connect();
+              setIsConnected(true);
             }}>
             Connect
           </Button>
