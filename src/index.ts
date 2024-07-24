@@ -16,4 +16,7 @@ export {
   ClaudeResponse,
   ClaudeUsage,
   ClaudeContent,
+  Debate,
+  DebateHistory,
+  DebateOptions,
 } from './plugins';

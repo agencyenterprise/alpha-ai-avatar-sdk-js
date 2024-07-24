@@ -3,7 +3,7 @@ import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
 import {
   AvatarClientConfig,
   CreateRoomResponse,
-  GetAvatarsResponse,
+  Avatars,
   GetSupportedVoicesResponse,
   MessageState,
   MessageType,
@@ -15,10 +15,12 @@ export class AvatarClient extends HTTPClient {
   private room?: Room;
   private avatarId?: number;
   private isAvatarSpeaking: boolean = false;
-  private availableAvatars: GetAvatarsResponse = [];
+  private avatarsAvailable: Avatars = [];
 
   private videoElement?: HTMLVideoElement;
   private audioElement?: HTMLAudioElement;
+
+  onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
 
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
@@ -43,7 +45,7 @@ export class AvatarClient extends HTTPClient {
   }
 
   get avatars() {
-    return this.availableAvatars;
+    return this.avatarsAvailable;
   }
 
   get isConnected() {
@@ -55,7 +57,7 @@ export class AvatarClient extends HTTPClient {
   }
 
   getAvatars() {
-    return this.get<GetAvatarsResponse>('/avatars');
+    return this.get<Avatars>('/avatars');
   }
 
   getSupportedVoices() {
@@ -78,20 +80,9 @@ export class AvatarClient extends HTTPClient {
   }
 
   disconnect() {
+    this.removeRoomListeners();
     this.room?.disconnect();
     this.room = undefined;
-  }
-
-  onAvatarSpeaking(callback: (isSpeaking: boolean) => void) {
-    this.room?.on(RoomEvent.DataReceived, (data: Uint8Array) => {
-      const decoder = new TextDecoder();
-      const message: ParsedMessage = JSON.parse(decoder.decode(data));
-      if (message.type === MessageType.State) {
-        const isAvatarSpeaking = message.data.state === MessageState.Speaking;
-        this.isAvatarSpeaking = isAvatarSpeaking;
-        callback(isAvatarSpeaking);
-      }
-    });
   }
 
   private setupRoomListeners() {
@@ -99,7 +90,17 @@ export class AvatarClient extends HTTPClient {
 
     this.room
       .on(RoomEvent.TrackSubscribed, this.handleTrackSubscribed.bind(this))
-      .on(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed.bind(this));
+      .on(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed.bind(this))
+      .on(RoomEvent.DataReceived, this.handleDataReceived.bind(this));
+  }
+
+  private removeRoomListeners() {
+    if (!this.room) return;
+
+    this.room
+      .off(RoomEvent.TrackSubscribed, this.handleTrackSubscribed.bind(this))
+      .off(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed.bind(this))
+      .off(RoomEvent.DataReceived, this.handleDataReceived.bind(this));
   }
 
   private handleTrackSubscribed(track: RemoteTrack) {
@@ -114,10 +115,22 @@ export class AvatarClient extends HTTPClient {
     track.detach();
   }
 
+  private handleDataReceived(data: Uint8Array) {
+    const decoder = new TextDecoder();
+    const message: ParsedMessage = JSON.parse(decoder.decode(data));
+    if (message.type === MessageType.State) {
+      const isAvatarSpeaking = message.data.state === MessageState.Speaking;
+      this.isAvatarSpeaking = isAvatarSpeaking;
+      if (this.onAvatarSpeakingChange) {
+        this.onAvatarSpeakingChange(isAvatarSpeaking);
+      }
+    }
+  }
+
   private async fetchAvatars() {
     const response = await this.getAvatars();
-    this.availableAvatars = response;
-    return this.availableAvatars;
+    this.avatarsAvailable = response;
+    return this.avatarsAvailable;
   }
 
   private async sendMessage(message: any) {

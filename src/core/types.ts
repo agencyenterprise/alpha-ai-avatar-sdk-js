@@ -4,7 +4,7 @@ export declare type AvatarClientConfig = {
   avatarId?: number;
 };
 
-export declare type GetAvatarsResponse = {
+export declare type Avatars = {
   id: number;
   name: string;
   thumbnail: string;

@@ -7,3 +7,5 @@ export {
   ClaudeUsage,
   ClaudeContent,
 } from './llm/claude';
+export { Debate } from './ext/debate/Debate';
+export { DebateHistory, DebateOptions } from './ext/debate/types';
