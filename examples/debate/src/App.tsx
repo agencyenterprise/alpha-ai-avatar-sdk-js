@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Debate, GetAvatarsResponse } from 'alpha-ai-avatar-sdk-js';
+import { Debate, Avatars, DebateHistory } from 'alpha-ai-avatar-sdk-js';
 
 const newDebate = new Debate({
   apiKey: 'API_KEY',
@@ -17,9 +17,9 @@ export const App = () => {
 
   const [debate, setDebate] = useState<Debate>();
   const [debateTheme, setDebateTheme] = useState('');
-  const [debateHistory, setDebateHistory] = useState([]);
+  const [debateHistory, setDebateHistory] = useState<DebateHistory[]>([]);
 
-  const [avatars, setAvatars] = useState<GetAvatarsResponse>([]);
+  const [avatars, setAvatars] = useState<Avatars>([]);
   const [selectedAvatarA, setSelectedAvatarA] = useState<number>();
   const [selectedAvatarB, setSelectedAvatarB] = useState<number>();
 

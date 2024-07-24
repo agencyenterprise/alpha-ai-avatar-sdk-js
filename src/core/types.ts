@@ -4,7 +4,7 @@ export declare type AvatarClientConfig = {
   avatarId?: number;
 };
 
-export declare type GetAvatarsResponse = {
+export declare type Avatars = {
   id: number;
   name: string;
   thumbnail: string;
@@ -57,9 +57,4 @@ export type ParsedMessage = {
     state: MessageState;
   };
   type: MessageType;
-};
-
-export type Prompt = {
-  role: string;
-  content: string;
 };

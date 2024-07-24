@@ -1,14 +1,8 @@
-import { AvatarClient } from '../../../core/AvatarClient';
-import { OpenAIClient } from '../../llm/openai';
-import { GetAvatarsResponse, Prompt } from '../../../core/types';
+import { Avatars } from '../../../core/types';
 import { getFirstSpeakerPrompt } from './utils';
-
-export type DebateOptions = {
-  apiKey: string;
-  baseUrl: string;
-  openAIApiKey: string;
-  openAIResourceName: string;
-};
+import { OpenAIClient } from '../../llm/openai';
+import { AvatarClient } from '../../../core/AvatarClient';
+import { DebateHistory, DebateOptions, Prompt } from './types';
 
 export class Debate {
   private apiKey: string;
@@ -21,14 +15,14 @@ export class Debate {
   private avatarClientB: AvatarClient | null = null;
 
   private debateTheme: string = '';
-  private debateHistory: any = [];
+  private debateHistory: DebateHistory[] = [];
 
   private currentSpeaker: string = 'A';
-  private avatarsAvailable: GetAvatarsResponse = [];
+  private avatarsAvailable: Avatars = [];
 
   private prompt: Prompt[] = [];
 
-  onDebateHistoryChange?: (debateHistory: any) => void;
+  onDebateHistoryChange?: (debateHistory: DebateHistory[]) => void;
   onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
 
   constructor(options: DebateOptions) {

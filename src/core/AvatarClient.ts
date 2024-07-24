@@ -3,7 +3,7 @@ import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
 import {
   AvatarClientConfig,
   CreateRoomResponse,
-  GetAvatarsResponse,
+  Avatars,
   GetSupportedVoicesResponse,
   MessageState,
   MessageType,
@@ -15,7 +15,7 @@ export class AvatarClient extends HTTPClient {
   private room?: Room;
   private avatarId?: number;
   private isAvatarSpeaking: boolean = false;
-  private avatarsAvailable: GetAvatarsResponse = [];
+  private avatarsAvailable: Avatars = [];
 
   private videoElement?: HTMLVideoElement;
   private audioElement?: HTMLAudioElement;
@@ -57,7 +57,7 @@ export class AvatarClient extends HTTPClient {
   }
 
   getAvatars() {
-    return this.get<GetAvatarsResponse>('/avatars');
+    return this.get<Avatars>('/avatars');
   }
 
   getSupportedVoices() {

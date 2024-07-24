@@ -1,14 +1,15 @@
 # DO NOT use this code, ONLY use it as a reference to understand how the Avatar SDK is implemented.
+
 - **Important** note which methods are async and which are not.
 
-```javascript 
+```javascript
 export declare type AvatarClientConfig = {
   apiKey: string;
   baseUrl?: string;
   avatarId?: number;
 };
 
-export declare type GetAvatarsResponse = {
+export declare type Avatars = {
   id: number;
   name: string;
   thumbnail: string;
@@ -62,7 +63,7 @@ export class AvatarClient extends HTTPClient {
   }
 
   getAvatars() {
-    return this.get<GetAvatarsResponse>('/avatars');
+    return this.get<Avatars>('/avatars');
   }
 
   getSupportedVoices() {

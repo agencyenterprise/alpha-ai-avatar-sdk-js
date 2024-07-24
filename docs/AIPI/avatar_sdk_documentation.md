@@ -1,7 +1,7 @@
-
 # Interactive Avatar SDK - Documentation for Claude:
 
 ## Required Method To Import SDK:
+
 ```jsx
 const [sdkIsLoaded, setSdkIsLoaded] = useState(false);
 const [avatarClient, setAvatarClient] = useState(null);
@@ -21,7 +21,7 @@ useEffect(() => {
 
 useEffect(() => {
     if (sdkIsLoaded && window.Avatar) {
-        const client = new window.Avatar.AvatarClient({ 
+        const client = new window.Avatar.AvatarClient({
             apiKey: <API_KEY_GOES_HERE>,
             baseUrl: <API_URL_GOES_HERE>
         });
@@ -31,6 +31,7 @@ useEffect(() => {
 ```
 
 > Note: Before returning the full component, make sure the SDK is loaded
+
 ```jsx
 if (!sdkLoaded) {
   return <div>Loading Alpha AI Avatar SDK...</div>;
@@ -42,78 +43,97 @@ if (!sdkLoaded) {
 ## Handling Avatar Rendering:
 
 1. You need to `await` the `connect` method to get the room object, and save it to state.
+
 - Connect method:
+
 ```jsx
 const connectAvatarRoom = async () => {
-    const newRoom = await avatarClient.connect();
-    setRoom(newRoom);
+  const newRoom = await avatarClient.connect();
+  setRoom(newRoom);
 };
 ```
+
 - Connecting to a specific avatar when creating room (optional):
+
 ```jsx
 const connectAvatarRoom = async () => {
-    const avatarID = 29 // all avatars have a numeric ID
-    const newRoom = await avatarClient.connect(avatarID);
-    setRoom(newRoom);
+  const avatarID = 29; // all avatars have a numeric ID
+  const newRoom = await avatarClient.connect(avatarID);
+  setRoom(newRoom);
 };
 ```
 
 - Disconnecting:
+
 ```jsx
 const handleDisconnect = () => {
-    avatarClient.disconnect();
-    setRoom(null);
+  avatarClient.disconnect();
+  setRoom(null);
 };
 ```
 
-
 2. You must then attach the video and audio elements to the room object.
-```jsx
-  const videoRef = useRef(null);
-  const audioRef = useRef(null);
 
-  useEffect(() => {
-    if (room && window.Avatar) {
-      room
-        .on(window.Avatar.RoomEvent.TrackSubscribed, (track) => {
-          if (track.kind === 'video') {
-            track.attach(videoRef.current);
-          } else if (track.kind === 'audio') {
-            track.attach(audioRef.current);
-          }
-        })
-        .on(window.Avatar.RoomEvent.TrackUnsubscribed, (track) => {
-          track.detach();
-        });
-    }
-  }, [room]);
+```jsx
+const videoRef = useRef(null);
+const audioRef = useRef(null);
+
+useEffect(() => {
+  if (room && window.Avatar) {
+    room
+      .on(window.Avatar.RoomEvent.TrackSubscribed, (track) => {
+        if (track.kind === 'video') {
+          track.attach(videoRef.current);
+        } else if (track.kind === 'audio') {
+          track.attach(audioRef.current);
+        }
+      })
+      .on(window.Avatar.RoomEvent.TrackUnsubscribed, (track) => {
+        track.detach();
+      });
+  }
+}, [room]);
 ```
 
 3. Only render the video and audio elements when the room object is available.
+
 ```jsx
-    { room ? 
-        <>
-            <video ref={videoRef} autoPlay playsInline muted className="w-full h-64 bg-gray-200 rounded" />
-            <audio ref={audioRef} style={{ display: 'none' }} autoPlay />
-        </>
-        : 
-        <button onClick={handleConnect} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Connect
-        </button>
-    }
+{
+  room ? (
+    <>
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className='w-full h-64 bg-gray-200 rounded'
+      />
+      <audio ref={audioRef} style={{ display: 'none' }} autoPlay />
+    </>
+  ) : (
+    <button
+      onClick={handleConnect}
+      className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+      Connect
+    </button>
+  );
+}
 ```
 
 ## Methods:
 
 #### `avatarClient.say(message: string, options: SayOptions = {})`
+
 - This method is used to make the avatar speak.
 - This method adds each message to a queue and plays them one by one, this is designed so you can stack multiple messages in a text-stream situation since shorter chunks are better for latency.
+
 ```jsx
 avatarClient.say("Hello, I'm an AI Avatar!");
 ```
 
-- Advanced customization (all properties are optional). 
+- Advanced customization (all properties are optional).
 - See section "Customizing Voice, Prosody & SSML" for more details
+
 ```jsx
 type SayOptions = {
   voiceName?: string;
@@ -139,33 +159,40 @@ avatarClient.say('Hello, World!', {
 ```
 
 #### `avatarClient.stop()`
+
 - This method is used to stop the avatar mid-speech. Used if you want to interrupt the avatar speaking or clear the `say` queue.
+
 ```jsx
 avatarClient.stop();
 ```
 
 #### `avatarClient.getAvatars()`
+
 - Returns array of all avatars supported by the SDK.
 - Response Type:
+
 ```jsx
-type GetAvatarsResponse = {
+type Avatars = {
   id: number; // use this to switch avatar
   name: string;
   thumbnail: string;
 }[]
 ```
 
-
 #### `avatarClient.switchAvatar(id: number)`
- - This method is used to switch the avatar.
+
+- This method is used to switch the avatar.
+
 ```jsx
-      const newAvatar = await avatarClient.switchAvatar(4); // Switching to avatar with ID 4
-      setRoom(newAvatar);
+const newAvatar = await avatarClient.switchAvatar(4); // Switching to avatar with ID 4
+setRoom(newAvatar);
 ```
 
 #### `avatarClient.getSupportedVoices`
+
 - Returns array of all voices supported by the SDK.
 - Response Type:
+
 ```jsx
 type GetSupportedVoicesResponse = {
     [language-local: string]: {
@@ -180,7 +207,8 @@ type GetSupportedVoicesResponse = {
 // example: { en-AU: Array(14), en-CA: Array(2), en-GB: Array(17), ...}
 ```
 
-- Example of configuring voice: 
+- Example of configuring voice:
+
 ```jsx
 avatarClient.say('Hello, World!', {
   voiceName: 'en-US-DavisNeural', // shortName
@@ -188,15 +216,20 @@ avatarClient.say('Hello, World!', {
 });
 ```
 
-# Customizing Voice: 
+# Customizing Voice:
 
 ## Empasis using `<emphasis>` tag:
+
 ```jsx
-avatarClient.say('I can help you join your <emphasis level="moderate">meetings</emphasis> fast.')
+avatarClient.say(
+  'I can help you join your <emphasis level="moderate">meetings</emphasis> fast.',
+);
 ```
 
 ## Multiple languages in the same voice:
+
 - If using a `Multilingual` voice, you can switch languages in the same `say()` method through SSML
+
 ```
 avatarClient.say(`
     <lang xml:lang="es-MX">
@@ -214,6 +247,7 @@ avatarClient.say(`
 ```
 
 ## Pronunciation using Phonemes:
+
 - `alphabet` options for declaring phoneme set: ["sapi", "ipa", "x-sampa", "ups"]
 - **IMPORTANT** If the specified string contains unrecognized phones, text to speech rejects the entire SSML document and produces none of the speech output specified in the document.
 - For ipa, to stress one syllable by placing stress symbol before this syllable, you need to mark all syllables for the word. Or else, the syllable before this stress symbol is stressed. For sapi, if you want to stress one syllable, you need to place the stress symbol after this syllable, whether or not all syllables of the word are marked.
@@ -231,8 +265,3 @@ avatarClient.say("<phoneme alphabet='x-sampa' ph='he."lou'>hello</phoneme>")
 // ups example
 avatarClient.say("His name is Mike <phoneme alphabet="ups" ph="JH AU"> Zhou </phoneme>")
 ```
-
-
-
-
-
