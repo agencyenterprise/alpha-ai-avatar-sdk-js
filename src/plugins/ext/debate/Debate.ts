@@ -134,15 +134,6 @@ export class Debate {
     }
   }
 
-  disconnect() {
-    if (this.avatarClientA && this.avatarClientB) {
-      this.stop();
-      this.clearState();
-      this.avatarClientA.disconnect();
-      this.avatarClientB.disconnect();
-    }
-  }
-
   private clearState() {
     this.currentSpeaker = 'A';
     this.debateTheme = '';
