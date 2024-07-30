@@ -134,4 +134,4 @@ Large Language Model (LMM) is a type of AI (Artificial Intelligence) that can re
 
 3. **Example**
 
-   For a complete example, refer to our [Using LLM example](/examples/llm).
+   For a complete example, refer to our [Using Conversation example](/examples/conversation).
