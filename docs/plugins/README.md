@@ -43,7 +43,7 @@ Converts spoken language into written text. It enables applications to transcrib
 
 3. **Example**
 
-   For a complete example, refer to our [Using LLM example](/examples/llm).
+   For a complete example, refer to our [Using Conversation example](/examples/conversation).
 
 ## LLM
 
@@ -134,4 +134,4 @@ Large Language Model (LMM) is a type of AI (Artificial Intelligence) that can re
 
 3. **Example**
 
-   For a complete example, refer to our [Using Conversation example](/examples/conversation).
+   For a complete example, refer to our [Using LLM example](/examples/llm).
