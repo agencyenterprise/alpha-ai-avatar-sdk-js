@@ -10,8 +10,7 @@ To create an instance of the `AvatarClient`, use the following code:
 
 ```javascript
 const client = new AvatarClient({
-  apiKey: 'YOUR_API_KEY',
-  baseUrl: 'https://staging.avatar.alpha.school',
+  apiKey: 'YOUR_API_KEY', // Required: Your API key for authentication.
 });
 ```
 
