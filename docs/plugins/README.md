@@ -38,7 +38,7 @@ Converts spoken language into written text. It enables applications to transcrib
    To stop the recognition you just need to call:
 
    ```javascript
-   azureService.close()
+   azureService.close();
    ```
 
 3. **Example**
@@ -57,10 +57,10 @@ Large Language Model (LMM) is a type of AI (Artificial Intelligence) that can re
 
 1. **Import the Plugin**
 
-  To use Claude AI to generate a message, start by importing it:
+   To use Claude AI to generate a message, start by importing it:
 
    ```javascript
-   import { ClaudeAIClient } from 'alpha-ai-avatar-sdk-js/plugins/llm/claude'
+   import { ClaudeAIClient } from 'alpha-ai-avatar-sdk-js/plugins/llm/claude';
    ```
 
 2. **Configure the Plugin**
@@ -69,22 +69,22 @@ Large Language Model (LMM) is a type of AI (Artificial Intelligence) that can re
    Then you can send a prompt to generate a response:
 
    ```javascript
-   const claudeAIClient = new ClaudeAIClient('CLAUDE_AI_API_KEY')
+   const claudeAIClient = new ClaudeAIClient('CLAUDE_AI_API_KEY');
 
    const response = await claudeAIClient.getCompletions(
-      'MODEL_NAME', // eg: 'claude-3-5-sonnet-20240620'
-      [
-         {
-            content: `You're an assistant created by Alpha School to help students with their homework`
-         },
-         {
-            content: `What it's quantum physics?`,
-            role: 'user'
-         }
-      ]
-   )
+     'MODEL_NAME', // eg: 'claude-3-5-sonnet-20240620'
+     [
+       {
+         content: `You're an assistant created by Alpha School to help students with their homework`,
+       },
+       {
+         content: `What it's quantum physics?`,
+         role: 'user',
+       },
+     ],
+   );
 
-   console.log(response.content[0].message)
+   console.log(response.content[0].message);
    ```
 
 3. **Example**
@@ -99,10 +99,10 @@ Large Language Model (LMM) is a type of AI (Artificial Intelligence) that can re
 
 1. **Import the Plugin**
 
-  To use OpenAI to generate a message, start by importing it:
+   To use OpenAI to generate a message, start by importing it:
 
    ```javascript
-   import { OpenAIClient } from 'alpha-ai-avatar-sdk-js/plugins/llm/openai'
+   import { OpenAIClient } from 'alpha-ai-avatar-sdk-js/plugins/llm/openai';
    ```
 
 2. **Configure the Plugin**
@@ -112,26 +112,27 @@ Large Language Model (LMM) is a type of AI (Artificial Intelligence) that can re
 
    ```javascript
    const openAIClient = new OpenAIClient({
-      resourceName: 'OPEN_AI_AZURE_RESOURCE_NAME',
-      apiKey: 'OPEN_AI_AZURE_API_KEY'
-   })
+     resourceName: 'OPEN_AI_AZURE_RESOURCE_NAME',
+     apiKey: 'OPEN_AI_AZURE_API_KEY',
+   });
 
-   const message = await openAIClient.getCompletions(
-      'DEPLOYMENT_ID',
-      [
-         {
-            content: `You're an assistant created by Alpha School to help students with their homework`
-         },
-         {
-            content: `What it's quantum physics?`,
-            role: 'user'
-         }
-      ]
-   )
+   const message = await openAIClient.getCompletions('DEPLOYMENT_ID', [
+     {
+       content: `You're an assistant created by Alpha School to help students with their homework`,
+     },
+     {
+       content: `What it's quantum physics?`,
+       role: 'user',
+     },
+   ]);
 
-   console.log(message)
+   console.log(message);
    ```
 
 3. **Example**
 
    For a complete example, refer to our [Using LLM example](/examples/llm).
+
+## Additional Resources
+
+Please refer to our [simple usage documentation](/README.md) or our [comprehensive documentation](/docs) for a detailed overview of all available features.
