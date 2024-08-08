@@ -21,6 +21,11 @@ export class AvatarClient extends HTTPClient {
   private audioElement?: HTMLAudioElement;
 
   onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
+  onTranscription?: (transcript: {
+    message: string;
+    role: string;
+    isFinal: boolean;
+  }) => void;
 
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
@@ -90,6 +95,12 @@ export class AvatarClient extends HTTPClient {
     }
   }
 
+  async stopConversationalMode() {
+    if (this.isConnected) {
+      this.room?.localParticipant?.setMicrophoneEnabled(false);
+    }
+  }
+
   disconnect() {
     this.removeRoomListeners();
     this.room?.disconnect();
@@ -134,6 +145,12 @@ export class AvatarClient extends HTTPClient {
       this.isAvatarSpeaking = isAvatarSpeaking;
       if (this.onAvatarSpeakingChange) {
         this.onAvatarSpeakingChange(isAvatarSpeaking);
+      }
+    }
+
+    if (message.type === MessageType.Transcript) {
+      if (this.onTranscription) {
+        this.onTranscription(message.data);
       }
     }
   }
