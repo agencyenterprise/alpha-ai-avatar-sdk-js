@@ -79,6 +79,14 @@ export class AvatarClient extends HTTPClient {
     return this.connect(avatarId);
   }
 
+  enableConversationalMode() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+      if (this.isConnected) {
+        this.room?.localParticipant?.setMicrophoneEnabled(true);
+      }
+    });
+  }
+
   disconnect() {
     this.removeRoomListeners();
     this.room?.disconnect();
