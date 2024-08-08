@@ -79,12 +79,15 @@ export class AvatarClient extends HTTPClient {
     return this.connect(avatarId);
   }
 
-  enableConversationalMode() {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+  async enableConversationalMode() {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
       if (this.isConnected) {
         this.room?.localParticipant?.setMicrophoneEnabled(true);
       }
-    });
+    } catch (error) {
+      console.error('Error enabling conversational mode:', error);
+    }
   }
 
   disconnect() {
