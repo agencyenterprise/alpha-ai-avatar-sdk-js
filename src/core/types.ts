@@ -53,15 +53,40 @@ export enum MessageType {
   Error = 2,
 }
 
-export type ParsedMessage = {
+export type TranscriptMessage = {
   data: {
     message: string;
-    state: MessageState;
     role: string;
     isFinal: boolean;
   };
-  type: MessageType;
+  type: MessageType.Transcript;
 };
+
+export type IdleStateMessage = {
+  data: {
+    state: MessageState.Idle;
+  };
+  type: MessageType.State;
+};
+
+export type SpeakingStateMessage = {
+  data: {
+    state: MessageState.Speaking;
+    message: string;
+  };
+  type: MessageType.State;
+};
+
+export type StateMessage = IdleStateMessage | SpeakingStateMessage;
+
+export type ErrorMessage = {
+  data: {
+    message: string;
+  };
+  type: MessageType.Error;
+};
+
+export type ParsedMessage = TranscriptMessage | StateMessage | ErrorMessage;
 
 export type Prompt = {
   role: string;

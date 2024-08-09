@@ -1,15 +1,16 @@
-import { HTTPClient } from './HTTPClient';
 import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
+import { HTTPClient } from './HTTPClient';
 import {
   AvatarClientConfig,
-  CreateRoomResponse,
   Avatars,
+  CreateRoomResponse,
   GetSupportedVoicesResponse,
   MessageState,
   MessageType,
   ParsedMessage,
   SayOptions,
   Prompt,
+  TranscriptMessage,
 } from './types';
 
 export class AvatarClient extends HTTPClient {
@@ -24,11 +25,7 @@ export class AvatarClient extends HTTPClient {
   private audioElement?: HTMLAudioElement;
 
   onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
-  onTranscription?: (transcript: {
-    message: string;
-    role: string;
-    isFinal: boolean;
-  }) => void;
+  onTranscription?: (transcript: TranscriptMessage['data']) => void;
 
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
