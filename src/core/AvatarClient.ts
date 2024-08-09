@@ -9,6 +9,7 @@ import {
   MessageType,
   ParsedMessage,
   SayOptions,
+  Prompt,
 } from './types';
 
 export class AvatarClient extends HTTPClient {
@@ -16,6 +17,8 @@ export class AvatarClient extends HTTPClient {
   private avatarId?: number;
   private isAvatarSpeaking: boolean = false;
   private avatarsAvailable: Avatars = [];
+  private conversational: boolean = false;
+  private initialPrompt?: Prompt[];
 
   private videoElement?: HTMLVideoElement;
   private audioElement?: HTMLAudioElement;
@@ -30,6 +33,8 @@ export class AvatarClient extends HTTPClient {
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
     this.avatarId = config.avatarId;
+    this.conversational = config.conversational ?? false;
+    this.initialPrompt = config.initialPrompt;
   }
 
   async init(videoElement: HTMLVideoElement, audioElement: HTMLAudioElement) {
@@ -41,6 +46,8 @@ export class AvatarClient extends HTTPClient {
   async connect(avatarId?: number) {
     const { serverUrl, token } = await this.post<CreateRoomResponse>('/rooms', {
       avatarId: avatarId ?? this.avatarId,
+      conversational: this.conversational,
+      initialPrompt: JSON.stringify(this.initialPrompt),
     });
     const room = new Room({ adaptiveStream: true });
     room.connect(serverUrl, token);
@@ -84,7 +91,7 @@ export class AvatarClient extends HTTPClient {
     return this.connect(avatarId);
   }
 
-  async enableConversationalMode() {
+  async enableMicrophone() {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       if (this.isConnected) {
@@ -95,7 +102,7 @@ export class AvatarClient extends HTTPClient {
     }
   }
 
-  async stopConversationalMode() {
+  async disableMicrophone() {
     if (this.isConnected) {
       this.room?.localParticipant?.setMicrophoneEnabled(false);
     }

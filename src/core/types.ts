@@ -2,6 +2,8 @@ export declare type AvatarClientConfig = {
   apiKey: string;
   baseUrl?: string;
   avatarId?: number;
+  conversational?: boolean;
+  initialPrompt?: Prompt[];
 };
 
 export declare type Avatars = {
@@ -59,4 +61,9 @@ export type ParsedMessage = {
     isFinal: boolean;
   };
   type: MessageType;
+};
+
+export type Prompt = {
+  role: string;
+  content: string;
 };
