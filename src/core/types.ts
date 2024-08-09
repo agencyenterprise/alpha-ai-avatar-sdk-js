@@ -60,13 +60,22 @@ export type TranscriptMessage = {
   type: MessageType.Transcript;
 };
 
-export type StateMessage = {
+export type IdleStateMessage = {
   data: {
-    state: MessageState;
-    message?: string;
+    state: MessageState.Idle;
   };
   type: MessageType.State;
 };
+
+export type SpeakingStateMessage = {
+  data: {
+    state: MessageState.Speaking;
+    message: string;
+  };
+  type: MessageType.State;
+};
+
+export type StateMessage = IdleStateMessage | SpeakingStateMessage;
 
 export type ErrorMessage = {
   data: {
