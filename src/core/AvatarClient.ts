@@ -44,7 +44,7 @@ export class AvatarClient extends HTTPClient {
     const { serverUrl, token } = await this.post<CreateRoomResponse>('/rooms', {
       avatarId: avatarId ?? this.avatarId,
       conversational: this.conversational,
-      initialPrompt: JSON.stringify(this.initialPrompt),
+      initialPrompt: this.initialPrompt,
     });
     const room = new Room({ adaptiveStream: true });
     room.connect(serverUrl, token);
