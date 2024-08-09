@@ -55,6 +55,8 @@ export type ParsedMessage = {
   data: {
     message: string;
     state: MessageState;
+    role: string;
+    isFinal: boolean;
   };
   type: MessageType;
 };

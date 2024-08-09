@@ -1,6 +1,6 @@
 {
   "name": "alpha-ai-avatar-sdk-js",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Alpha AI Avatar SDK (JS)",
   "main": "index.js",
   "module": "index.esm.js",
