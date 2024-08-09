@@ -63,6 +63,7 @@ export type TranscriptMessage = {
 export type StateMessage = {
   data: {
     state: MessageState;
+    message?: string;
   };
   type: MessageType.State;
 };
