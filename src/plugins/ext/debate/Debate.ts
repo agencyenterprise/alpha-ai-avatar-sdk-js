@@ -1,8 +1,8 @@
-import { Avatars } from '../../../core/types';
-import { getFirstSpeakerPrompt } from './utils';
-import { OpenAIClient } from '../../llm/openai';
 import { AvatarClient } from '../../../core/AvatarClient';
+import { Avatars } from '../../../core/types';
+import { OpenAIClient } from '../../llm/openai';
 import { DebateHistory, DebateOptions, Prompt } from './types';
+import { getFirstSpeakerPrompt } from './utils';
 
 export class Debate {
   private apiKey: string;

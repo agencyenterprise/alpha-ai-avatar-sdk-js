@@ -5,18 +5,12 @@ export type * from './core/types';
 export { AvatarClient } from './core/AvatarClient';
 
 // LiveKit
-export { Room, RoomEvent, Track, RemoteTrack } from 'livekit-client';
+export { RemoteTrack, Room, RoomEvent, Track } from 'livekit-client';
 
 // Plugins
 export {
-  AzureSpeechRecognition,
-  OpenAIClient,
-  ClaudeAIClient,
-  MessageParam,
-  ClaudeResponse,
-  ClaudeUsage,
-  ClaudeContent,
-  Debate,
+  AzureSpeechRecognition, ClaudeAIClient, ClaudeContent, ClaudeResponse,
+  ClaudeUsage, Debate,
   DebateHistory,
-  DebateOptions,
+  DebateOptions, MessageParam, OpenAIClient
 } from './plugins';
