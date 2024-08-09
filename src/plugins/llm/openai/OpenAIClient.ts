@@ -1,6 +1,6 @@
 import {
-  OpenAIClient as AzureOpenAIClient,
   AzureKeyCredential,
+  OpenAIClient as AzureOpenAIClient,
   ChatRequestMessageUnion,
 } from '@azure/openai';
 

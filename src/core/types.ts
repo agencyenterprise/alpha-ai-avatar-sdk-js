@@ -51,12 +51,27 @@ export enum MessageType {
   Error = 2,
 }
 
-export type ParsedMessage = {
+export type TranscriptMessage = {
   data: {
     message: string;
-    state: MessageState;
     role: string;
     isFinal: boolean;
   };
-  type: MessageType;
+  type: MessageType.Transcript;
 };
+
+export type StateMessage = {
+  data: {
+    state: MessageState;
+  };
+  type: MessageType.State;
+};
+
+export type ErrorMessage = {
+  data: {
+    message: string;
+  };
+  type: MessageType.Error;
+};
+
+export type ParsedMessage = TranscriptMessage | StateMessage | ErrorMessage;
