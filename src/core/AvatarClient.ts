@@ -47,9 +47,10 @@ export class AvatarClient extends HTTPClient {
       initialPrompt: this.initialPrompt,
     });
     const room = new Room({ adaptiveStream: true });
+    room.prepareConnection(serverUrl, token);
+    this.setupRoomListeners();
     room.connect(serverUrl, token);
     this.room = room;
-    this.setupRoomListeners();
     return room;
   }
 
