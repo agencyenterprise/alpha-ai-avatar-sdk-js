@@ -11,6 +11,7 @@ import {
   SayOptions,
   Prompt,
   TranscriptMessage,
+  CreateVideoConfig,
 } from './types';
 
 export class AvatarClient extends HTTPClient {
@@ -105,6 +106,14 @@ export class AvatarClient extends HTTPClient {
     if (this.isConnected) {
       this.room?.localParticipant?.setMicrophoneEnabled(false);
     }
+  }
+
+  createVideo(avatarId: number, message: string, config?: CreateVideoConfig) {
+    return this.post<{ url: string }>('/videos', {
+      avatarId,
+      message,
+      ...config,
+    });
   }
 
   disconnect() {
