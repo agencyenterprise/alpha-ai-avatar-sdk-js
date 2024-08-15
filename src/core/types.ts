@@ -92,3 +92,17 @@ export type Prompt = {
   role: string;
   content: string;
 };
+
+export type CreateVideoConfig = {
+  voiceName?: string;
+  voiceStyle?: string;
+  multilingualLang?: string;
+  prosody?: {
+    contour?: string;
+    pitch?: string;
+    range?: string;
+    rate?: string;
+    volume?: string;
+  };
+  ssmlVoiceConfig?: string;
+};
