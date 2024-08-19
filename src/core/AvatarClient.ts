@@ -27,6 +27,7 @@ export class AvatarClient extends HTTPClient {
 
   onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
   onTranscription?: (transcript: TranscriptMessage['data']) => void;
+  onTrascriberStatusChange?: (status: string) => void;
 
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
@@ -155,6 +156,7 @@ export class AvatarClient extends HTTPClient {
   private handleDataReceived(data: Uint8Array) {
     const decoder = new TextDecoder();
     const message: ParsedMessage = JSON.parse(decoder.decode(data));
+
     if (message.type === MessageType.State) {
       const isAvatarSpeaking = message.data.state === MessageState.Speaking;
       this.isAvatarSpeaking = isAvatarSpeaking;
@@ -166,6 +168,12 @@ export class AvatarClient extends HTTPClient {
     if (message.type === MessageType.Transcript) {
       if (this.onTranscription) {
         this.onTranscription(message.data);
+      }
+    }
+
+    if (message.type === MessageType.TranscriberStatus) {
+      if (this.onTrascriberStatusChange) {
+        this.onTrascriberStatusChange(message.data.status);
       }
     }
   }

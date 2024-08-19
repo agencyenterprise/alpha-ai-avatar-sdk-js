@@ -24,6 +24,10 @@ export function App() {
       avatar.init(videoRef.current, audioRef.current);
     }
 
+    avatar.onTrascriberStatusChange = (status) => {
+      console.log('Status', status);
+    };
+
     return () => {
       avatar.disconnect();
     };
