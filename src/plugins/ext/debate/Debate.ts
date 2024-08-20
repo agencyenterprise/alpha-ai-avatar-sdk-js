@@ -3,6 +3,7 @@ import { Avatars } from '../../../core/types';
 import { OpenAIClient } from '../../llm/openai';
 import { DebateHistory, DebateOptions, Prompt } from './types';
 import { getFirstSpeakerPrompt } from './utils';
+import { EventEmitter } from 'events';
 
 export class Debate {
   private apiKey: string;
@@ -22,14 +23,14 @@ export class Debate {
 
   private prompt: Prompt[] = [];
 
-  onDebateHistoryChange?: (debateHistory: DebateHistory[]) => void;
-  onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
+  private eventEmitter: EventEmitter;
 
   constructor(options: DebateOptions) {
     this.apiKey = options.apiKey;
     this.baseUrl = options.baseUrl;
     this.openAIApiKey = options.openAIApiKey;
     this.openAIResourceName = options.openAIResourceName;
+    this.eventEmitter = new EventEmitter();
   }
 
   async init() {
@@ -87,18 +88,12 @@ export class Debate {
 
       this.avatarClientA.addEventListener(
         'avatarSpeakingChange',
-        (isSpeaking) => {
-          this.onAvatarSpeakingChange &&
-            this.onAvatarSpeakingChange(isSpeaking);
-        },
+        this.avatarSpeakingHandler,
       );
 
       this.avatarClientB.addEventListener(
         'avatarSpeakingChange',
-        (isSpeaking) => {
-          this.onAvatarSpeakingChange &&
-            this.onAvatarSpeakingChange(isSpeaking);
-        },
+        this.avatarSpeakingHandler,
       );
 
       this.currentSpeaker = 'A';
@@ -126,10 +121,7 @@ export class Debate {
 
     this.prompt.push({ role: 'user', content });
     this.debateHistory.push({ speaker: this.currentSpeaker, content });
-
-    if (this.onDebateHistoryChange) {
-      this.onDebateHistoryChange(this.debateHistory);
-    }
+    this.eventEmitter.emit('onDebateHistoryChange', this.debateHistory);
 
     this.currentSpeaker = this.currentSpeaker === 'A' ? 'B' : 'A';
   }
@@ -140,6 +132,18 @@ export class Debate {
       this.stopAvatars();
       this.disconnectAvatars();
     }
+  }
+
+  addEventListener(eventName: string, listener: (...args: any[]) => void) {
+    this.eventEmitter.on(eventName, listener);
+  }
+
+  removeEventListener(eventName: string, listener: (...args: any[]) => void) {
+    this.eventEmitter.off(eventName, listener);
+  }
+
+  private avatarSpeakingHandler(isSpeaking: boolean) {
+    this.eventEmitter.emit('avatarSpeakingChange', isSpeaking);
   }
 
   private clearState() {
@@ -160,6 +164,16 @@ export class Debate {
     if (this.avatarClientA && this.avatarClientB) {
       this.avatarClientA.disconnect();
       this.avatarClientB.disconnect();
+
+      // Remove event listeners
+      this.avatarClientA.removeEventListener(
+        'avatarSpeakingChange',
+        this.avatarSpeakingHandler,
+      );
+      this.avatarClientB.removeEventListener(
+        'avatarSpeakingChange',
+        this.avatarSpeakingHandler,
+      );
     }
   }
 }
