@@ -85,13 +85,21 @@ export class Debate {
       await this.avatarClientA.connect();
       await this.avatarClientB.connect();
 
-      this.avatarClientA.onAvatarSpeakingChange = (isSpeaking) => {
-        this.onAvatarSpeakingChange && this.onAvatarSpeakingChange(isSpeaking);
-      };
+      this.avatarClientA.addEventListener(
+        'avatarSpeakingChange',
+        (isSpeaking) => {
+          this.onAvatarSpeakingChange &&
+            this.onAvatarSpeakingChange(isSpeaking);
+        },
+      );
 
-      this.avatarClientB.onAvatarSpeakingChange = (isSpeaking) => {
-        this.onAvatarSpeakingChange && this.onAvatarSpeakingChange(isSpeaking);
-      };
+      this.avatarClientB.addEventListener(
+        'avatarSpeakingChange',
+        (isSpeaking) => {
+          this.onAvatarSpeakingChange &&
+            this.onAvatarSpeakingChange(isSpeaking);
+        },
+      );
 
       this.currentSpeaker = 'A';
     }

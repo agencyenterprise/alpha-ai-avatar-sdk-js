@@ -24,14 +24,23 @@ export function App() {
       avatar.init(videoRef.current, audioRef.current);
     }
 
-    avatar.onTrascriberStatusChange = (status) => {
-      console.log('Status', status);
-    };
+    avatar.addEventListener(
+      'transcriberStatusChange',
+      transcriberStatusHandler,
+    );
 
     return () => {
       avatar.disconnect();
+      avatar.removeEventListener(
+        'transcriberStatusChange',
+        transcriberStatusHandler,
+      );
     };
   }, []);
+
+  const transcriberStatusHandler = (status: string) => {
+    console.log('Transcriber status', status);
+  };
 
   return (
     <div
