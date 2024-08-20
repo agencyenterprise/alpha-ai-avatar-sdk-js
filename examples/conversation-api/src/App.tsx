@@ -20,6 +20,10 @@ export function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
+    const transcriberStatusHandler = (status: string) => {
+      console.log('Transcriber status', status);
+    };
+
     if (videoRef.current && audioRef.current) {
       avatar.init(videoRef.current, audioRef.current);
     }
@@ -37,10 +41,6 @@ export function App() {
       );
     };
   }, []);
-
-  const transcriberStatusHandler = (status: string) => {
-    console.log('Transcriber status', status);
-  };
 
   return (
     <div
