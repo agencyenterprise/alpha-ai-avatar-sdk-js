@@ -121,7 +121,7 @@ export class Debate {
 
     this.prompt.push({ role: 'user', content });
     this.debateHistory.push({ speaker: this.currentSpeaker, content });
-    this.eventEmitter.emit('onDebateHistoryChange', this.debateHistory);
+    this.eventEmitter.emit('debateHistoryChange', this.debateHistory);
 
     this.currentSpeaker = this.currentSpeaker === 'A' ? 'B' : 'A';
   }
