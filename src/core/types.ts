@@ -51,6 +51,13 @@ export enum MessageType {
   Transcript = 0,
   State = 1,
   Error = 2,
+  TranscriberStatus = 3,
+}
+
+export enum TranscriberStatus {
+  Open = 0,
+  Closed = 1,
+  Error = 2,
 }
 
 export type TranscriptMessage = {
@@ -77,6 +84,13 @@ export type SpeakingStateMessage = {
   type: MessageType.State;
 };
 
+export type TranscriberStatusMessage = {
+  data: {
+    status: TranscriberStatus;
+  };
+  type: MessageType.TranscriberStatus;
+};
+
 export type StateMessage = IdleStateMessage | SpeakingStateMessage;
 
 export type ErrorMessage = {
@@ -86,7 +100,11 @@ export type ErrorMessage = {
   type: MessageType.Error;
 };
 
-export type ParsedMessage = TranscriptMessage | StateMessage | ErrorMessage;
+export type ParsedMessage =
+  | TranscriptMessage
+  | StateMessage
+  | ErrorMessage
+  | TranscriberStatusMessage;
 
 export type Prompt = {
   role: string;

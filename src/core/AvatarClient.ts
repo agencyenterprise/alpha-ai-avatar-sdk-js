@@ -1,5 +1,6 @@
 import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
 import { HTTPClient } from './HTTPClient';
+import { EventEmitter } from 'events';
 import {
   AvatarClientConfig,
   Avatars,
@@ -10,7 +11,6 @@ import {
   ParsedMessage,
   SayOptions,
   Prompt,
-  TranscriptMessage,
   CreateVideoConfig,
 } from './types';
 
@@ -25,14 +25,14 @@ export class AvatarClient extends HTTPClient {
   private videoElement?: HTMLVideoElement;
   private audioElement?: HTMLAudioElement;
 
-  onAvatarSpeakingChange?: (isAvatarSpeaking: boolean) => void;
-  onTranscription?: (transcript: TranscriptMessage['data']) => void;
+  private eventEmitter: EventEmitter;
 
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
     this.avatarId = config.avatarId;
     this.conversational = config.conversational ?? false;
     this.initialPrompt = config.initialPrompt;
+    this.eventEmitter = new EventEmitter();
   }
 
   async init(videoElement: HTMLVideoElement, audioElement: HTMLAudioElement) {
@@ -89,6 +89,14 @@ export class AvatarClient extends HTTPClient {
     this.disconnect();
     this.avatarId = avatarId;
     return this.connect(avatarId);
+  }
+
+  addEventListener(eventName: string, listener: (...args: any[]) => void) {
+    this.eventEmitter.on(eventName, listener);
+  }
+
+  removeEventListener(eventName: string, listener: (...args: any[]) => void) {
+    this.eventEmitter.off(eventName, listener);
   }
 
   async enableMicrophone() {
@@ -155,18 +163,19 @@ export class AvatarClient extends HTTPClient {
   private handleDataReceived(data: Uint8Array) {
     const decoder = new TextDecoder();
     const message: ParsedMessage = JSON.parse(decoder.decode(data));
+
     if (message.type === MessageType.State) {
       const isAvatarSpeaking = message.data.state === MessageState.Speaking;
       this.isAvatarSpeaking = isAvatarSpeaking;
-      if (this.onAvatarSpeakingChange) {
-        this.onAvatarSpeakingChange(isAvatarSpeaking);
-      }
+      this.eventEmitter.emit('avatarSpeakingChange', isAvatarSpeaking);
     }
 
     if (message.type === MessageType.Transcript) {
-      if (this.onTranscription) {
-        this.onTranscription(message.data);
-      }
+      this.eventEmitter.emit('transcription', message.data);
+    }
+
+    if (message.type === MessageType.TranscriberStatus) {
+      this.eventEmitter.emit('transcriberStatusChange', message.data.status);
     }
   }
 

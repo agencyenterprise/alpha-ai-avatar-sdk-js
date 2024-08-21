@@ -1,4 +1,4 @@
-import { AvatarClient } from 'alpha-ai-avatar-sdk-js';
+import { AvatarClient, TranscriberStatus } from 'alpha-ai-avatar-sdk-js';
 import { Button } from './Button';
 import { useEffect, useRef, useState } from 'react';
 
@@ -20,12 +20,25 @@ export function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
+    const transcriberStatusHandler = (status: TranscriberStatus) => {
+      console.log('Transcriber status', status);
+    };
+
     if (videoRef.current && audioRef.current) {
       avatar.init(videoRef.current, audioRef.current);
     }
 
+    avatar.addEventListener(
+      'transcriberStatusChange',
+      transcriberStatusHandler,
+    );
+
     return () => {
       avatar.disconnect();
+      avatar.removeEventListener(
+        'transcriberStatusChange',
+        transcriberStatusHandler,
+      );
     };
   }, []);
 
