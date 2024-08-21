@@ -51,7 +51,7 @@ export enum MessageType {
   Transcript = 0,
   State = 1,
   Error = 2,
-  TranscriberStatus = 3,
+  TranscriberState = 3,
 }
 
 export enum TranscriberStatus {
@@ -88,7 +88,7 @@ export type TranscriberStatusMessage = {
   data: {
     status: TranscriberStatus;
   };
-  type: MessageType.TranscriberStatus;
+  type: MessageType.TranscriberState;
 };
 
 export type StateMessage = IdleStateMessage | SpeakingStateMessage;

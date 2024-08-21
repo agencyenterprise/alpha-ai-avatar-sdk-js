@@ -174,7 +174,7 @@ export class AvatarClient extends HTTPClient {
       this.eventEmitter.emit('transcription', message.data);
     }
 
-    if (message.type === MessageType.TranscriberStatus) {
+    if (message.type === MessageType.TranscriberState) {
       this.eventEmitter.emit('transcriberStatusChange', message.data.status);
     }
   }
