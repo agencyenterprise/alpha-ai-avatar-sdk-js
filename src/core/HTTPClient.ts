@@ -4,10 +4,7 @@ export class HTTPClient {
     private apiKey: string,
   ) {}
 
-  private async request<T>(
-    path: string,
-    options: RequestInit = {},
-  ) {
+  private async request<T>(path: string, options: RequestInit = {}) {
     const headers = {
       'Content-Type': 'application/json',
       'X-API-Key': this.apiKey,
@@ -30,11 +27,7 @@ export class HTTPClient {
     return this.request<T>(path, { ...options, method: 'GET' });
   }
 
-  protected post<T>(
-    path: string,
-    data?: any,
-    options: RequestInit = {},
-  ) {
+  protected post<T>(path: string, data?: any, options: RequestInit = {}) {
     return this.request<T>(path, {
       ...options,
       method: 'POST',

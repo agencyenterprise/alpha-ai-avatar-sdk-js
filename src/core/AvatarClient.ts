@@ -1,17 +1,17 @@
+import { EventEmitter } from 'events';
 import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
 import { HTTPClient } from './HTTPClient';
-import { EventEmitter } from 'events';
 import {
   AvatarClientConfig,
   Avatars,
   CreateRoomResponse,
+  CreateVideoConfig,
   GetSupportedVoicesResponse,
   MessageState,
   MessageType,
   ParsedMessage,
-  SayOptions,
   Prompt,
-  CreateVideoConfig,
+  SayOptions,
 } from './types';
 
 export class AvatarClient extends HTTPClient {
