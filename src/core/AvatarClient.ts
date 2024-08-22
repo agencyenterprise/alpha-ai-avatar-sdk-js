@@ -13,6 +13,7 @@ import {
   Prompt,
   CreateVideoConfig,
 } from './types';
+import { VideoPlayer } from './VideoPlayer';
 
 export class AvatarClient extends HTTPClient {
   private room?: Room;
@@ -24,6 +25,8 @@ export class AvatarClient extends HTTPClient {
 
   private videoElement?: HTMLVideoElement;
   private audioElement?: HTMLAudioElement;
+  private background?: string;
+  private videoPlayer?: VideoPlayer;
 
   private eventEmitter: EventEmitter;
 
@@ -35,9 +38,14 @@ export class AvatarClient extends HTTPClient {
     this.eventEmitter = new EventEmitter();
   }
 
-  async init(videoElement: HTMLVideoElement, audioElement: HTMLAudioElement) {
+  async init(
+    videoElement: HTMLVideoElement,
+    audioElement: HTMLAudioElement,
+    background?: string,
+  ) {
     this.videoElement = videoElement;
     this.audioElement = audioElement;
+    this.background = background;
     await this.fetchAvatars();
   }
 
@@ -150,7 +158,11 @@ export class AvatarClient extends HTTPClient {
 
   private handleTrackSubscribed(track: RemoteTrack) {
     if (track.kind === 'video' && this.videoElement) {
-      track.attach(this.videoElement);
+      this.videoPlayer = new VideoPlayer(
+        this.videoElement,
+        track,
+        this.background,
+      );
     } else if (track.kind === 'audio' && this.audioElement) {
       track.attach(this.audioElement);
     }
@@ -158,6 +170,10 @@ export class AvatarClient extends HTTPClient {
 
   private handleTrackUnsubscribed(track: RemoteTrack) {
     track.detach();
+
+    if (track.kind === 'video') {
+      this.videoPlayer?.destroy();
+    }
   }
 
   private handleDataReceived(data: Uint8Array) {
