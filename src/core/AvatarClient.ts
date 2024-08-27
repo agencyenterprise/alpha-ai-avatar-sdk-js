@@ -12,6 +12,7 @@ import {
   SayOptions,
   Prompt,
   CreateVideoConfig,
+  VideoPlayerConfig,
 } from './types';
 import { VideoPlayer } from './VideoPlayer';
 
@@ -23,10 +24,9 @@ export class AvatarClient extends HTTPClient {
   private conversational: boolean = false;
   private initialPrompt?: Prompt[];
 
-  private videoElement?: HTMLVideoElement;
   private audioElement?: HTMLAudioElement;
-  private background?: string;
-  private videoPlayer?: VideoPlayer;
+  private _videoPlayer?: VideoPlayer;
+  private videoPlayerConfig?: VideoPlayerConfig;
 
   private eventEmitter: EventEmitter;
 
@@ -39,13 +39,12 @@ export class AvatarClient extends HTTPClient {
   }
 
   async init(
-    videoElement: HTMLVideoElement,
+    videoPlayerConfig: VideoPlayerConfig,
     audioElement: HTMLAudioElement,
-    background?: string,
   ) {
-    this.videoElement = videoElement;
     this.audioElement = audioElement;
-    this.background = background;
+    this.videoPlayerConfig = videoPlayerConfig;
+
     await this.fetchAvatars();
   }
 
@@ -74,6 +73,10 @@ export class AvatarClient extends HTTPClient {
 
   get isSpeaking() {
     return this.isAvatarSpeaking;
+  }
+
+  public get videoPlayer() {
+    return this._videoPlayer;
   }
 
   getAvatars() {
@@ -157,12 +160,9 @@ export class AvatarClient extends HTTPClient {
   }
 
   private handleTrackSubscribed(track: RemoteTrack) {
-    if (track.kind === 'video' && this.videoElement) {
-      this.videoPlayer = new VideoPlayer(
-        this.videoElement,
-        track,
-        this.background,
-      );
+    if (track.kind === 'video' && this.videoPlayerConfig?.videoElement) {
+      this.videoPlayerConfig.videoTrack = track;
+      this._videoPlayer = new VideoPlayer(this.videoPlayerConfig);
     } else if (track.kind === 'audio' && this.audioElement) {
       track.attach(this.audioElement);
     }
@@ -172,7 +172,7 @@ export class AvatarClient extends HTTPClient {
     track.detach();
 
     if (track.kind === 'video') {
-      this.videoPlayer?.destroy();
+      this._videoPlayer?.destroy();
     }
   }
 

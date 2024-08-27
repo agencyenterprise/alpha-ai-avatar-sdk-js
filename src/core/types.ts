@@ -1,3 +1,5 @@
+import { RemoteTrack } from 'livekit-client';
+
 export declare type AvatarClientConfig = {
   apiKey: string;
   baseUrl?: string;
@@ -123,4 +125,20 @@ export type CreateVideoConfig = {
     volume?: string;
   };
   ssmlVoiceConfig?: string;
+};
+
+export type VideoPlayerConfig = {
+  videoElement: HTMLVideoElement;
+  videoTrack?: RemoteTrack;
+  background?: string;
+  avatarVideoConfig?: AvatarVideoConfig;
+};
+
+export type AvatarVideoDimension = number | 'auto';
+
+export type AvatarVideoConfig = {
+  videoX: number;
+  videoY: number;
+  videoWidth: AvatarVideoDimension;
+  videoHeight: AvatarVideoDimension;
 };

@@ -1,4 +1,8 @@
-import { RemoteTrack } from 'livekit-client';
+import {
+  AvatarVideoConfig,
+  AvatarVideoDimension,
+  VideoPlayerConfig,
+} from './types';
 
 const VALID_VIDEOS_EXT = ['mp4', 'webm', 'ogg', 'avi', 'mov'];
 const VALID_IMAGES_EXT = ['jpg', 'jpeg', 'png', 'gif'];
@@ -9,7 +13,7 @@ const DEFAULT_RESOLUTION = 512;
 
 export class VideoPlayer {
   private inputVideoElement: HTMLVideoElement;
-  private outputVideoElement: HTMLVideoElement;
+  private videoElement: HTMLVideoElement;
 
   private background?: string;
   private isVideo: boolean = false;
@@ -17,59 +21,47 @@ export class VideoPlayer {
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
 
-  constructor(
-    outputVideoElement: HTMLVideoElement,
-    videoTrack: RemoteTrack,
-    background?: string,
-  ) {
-    this.background = background;
-    this.outputVideoElement = outputVideoElement;
-    this.inputVideoElement = this.background
-      ? document.createElement('video')
-      : outputVideoElement;
+  private avatarVideoConfig: AvatarVideoConfig = {
+    videoX: 0,
+    videoY: 0,
+    videoWidth: 'auto',
+    videoHeight: 'auto',
+  };
 
-    videoTrack.attach(this.inputVideoElement);
+  constructor(config: VideoPlayerConfig) {
+    this.background = config.background;
+    this.videoElement = config.videoElement;
+    this.inputVideoElement = document.createElement('video');
 
-    if (this.background) {
-      /**
-       * The browser only renders the video if it's attached to the DOM.
-       */
-      document.body.appendChild(this.inputVideoElement).style.visibility =
-        'hidden';
-      this.renderBackground();
+    if (config.avatarVideoConfig) {
+      this.avatarVideoConfig = config.avatarVideoConfig;
     }
+
+    config.videoTrack?.attach(this.inputVideoElement);
+    /**
+     * The browser only renders the video if it's attached to the DOM.
+     */
+    document.body.appendChild(this.inputVideoElement).style.visibility =
+      'hidden';
+
+    this.renderCanvas();
   }
 
-  private renderBackground() {
-    this.createBackgroundElement();
-
-    if (!this.backgroundElement) {
-      return;
-    }
-
+  private renderCanvas() {
     this.canvas = document.createElement('canvas');
     this.canvasContext = this.canvas.getContext('2d', {
       willReadFrequently: true,
     })!;
-    this.outputVideoElement.srcObject = this.canvas.captureStream(30);
-    this.outputVideoElement.muted = true;
-    this.outputVideoElement.autoplay = true;
+    this.videoElement.srcObject = this.canvas.captureStream(30);
+    this.videoElement.muted = true;
+    this.videoElement.autoplay = true;
 
-    this.backgroundElement.addEventListener(
-      this.isVideo ? 'loadeddata' : 'load',
-      () => {
-        if (this.isVideo) {
-          (this.backgroundElement as HTMLVideoElement).play();
-        }
-
-        this.processFrame();
-      },
-    );
+    this.createBackgroundElement();
   }
 
   private createBackgroundElement() {
     if (!this.background) {
-      return;
+      return this.processVideoFrame();
     }
 
     const extension = this.background.split('.').pop();
@@ -88,15 +80,21 @@ export class VideoPlayer {
     } else {
       throw new Error('Invalid background file');
     }
+
+    this.backgroundElement.addEventListener(
+      this.isVideo ? 'loadeddata' : 'load',
+      () => {
+        if (this.isVideo) {
+          (this.backgroundElement as HTMLVideoElement).play();
+        }
+
+        this.processVideoFrame();
+      },
+    );
   }
 
-  private processFrame() {
-    if (
-      !this.inputVideoElement ||
-      !this.canvas ||
-      !this.canvasContext ||
-      !this.backgroundElement
-    ) {
+  private processVideoFrame() {
+    if (!this.inputVideoElement || !this.canvas || !this.canvasContext) {
       return;
     }
 
@@ -108,45 +106,91 @@ export class VideoPlayer {
     this.canvas.height = height;
     this.canvas.width = width;
 
-    this.canvasContext.drawImage(this.backgroundElement, 0, 0, width, height);
+    let bgData = null;
 
-    const { data: bgData } = this.canvasContext.getImageData(
-      0,
-      0,
-      width,
-      height,
+    if (this.backgroundElement) {
+      this.canvasContext.drawImage(this.backgroundElement, 0, 0, width, height);
+
+      const { data } = this.canvasContext.getImageData(0, 0, width, height);
+
+      bgData = data;
+    }
+
+    const videoHeight =
+      this.avatarVideoConfig.videoHeight === 'auto'
+        ? height
+        : this.avatarVideoConfig.videoHeight;
+    const videoWidth =
+      this.avatarVideoConfig.videoWidth === 'auto'
+        ? width
+        : this.avatarVideoConfig.videoWidth;
+
+    this.canvasContext.drawImage(
+      this.inputVideoElement,
+      this.avatarVideoConfig.videoX,
+      this.avatarVideoConfig.videoY,
+      videoWidth,
+      videoHeight,
     );
 
-    this.canvasContext.drawImage(this.inputVideoElement, 0, 0, width, height);
-
-    const videoFrame = this.canvasContext.getImageData(0, 0, width, height);
+    const videoFrame = this.canvasContext.getImageData(
+      0,
+      0,
+      videoWidth,
+      videoHeight,
+    );
 
     const videoData = videoFrame.data;
 
-    for (let i = 0; i < videoData.length; i += 4) {
-      const r = videoData[i]!;
-      const g = videoData[i + 1]!;
-      const b = videoData[i + 2]!;
+    if (bgData) {
+      for (let i = 0; i < videoData.length; i += 4) {
+        const r = videoData[i]!;
+        const g = videoData[i + 1]!;
+        const b = videoData[i + 2]!;
 
-      if (
-        r >= GREEN_SCALE_LOW[0] &&
-        r <= GREEN_SCALE_HIGH[0] &&
-        g >= GREEN_SCALE_LOW[1] &&
-        g <= GREEN_SCALE_HIGH[1] &&
-        b >= GREEN_SCALE_LOW[2] &&
-        b <= GREEN_SCALE_HIGH[2]
-      ) {
-        videoData[i] = bgData[i]!;
+        if (
+          r >= GREEN_SCALE_LOW[0] &&
+          r <= GREEN_SCALE_HIGH[0] &&
+          g >= GREEN_SCALE_LOW[1] &&
+          g <= GREEN_SCALE_HIGH[1] &&
+          b >= GREEN_SCALE_LOW[2] &&
+          b <= GREEN_SCALE_HIGH[2]
+        ) {
+          videoData[i] = bgData[i]!;
 
-        videoData[i + 1] = bgData[i + 1]!;
-        videoData[i + 2] = bgData[i + 2]!;
-        videoData[i + 3] = bgData[i + 3]!;
+          videoData[i + 1] = bgData[i + 1]!;
+          videoData[i + 2] = bgData[i + 2]!;
+          videoData[i + 3] = bgData[i + 3]!;
+        }
       }
     }
 
     this.canvasContext.putImageData(videoFrame, 0, 0);
 
-    requestAnimationFrame(() => this.processFrame());
+    requestAnimationFrame(() => this.processVideoFrame());
+  }
+
+  public setVideoDimensions(
+    width: AvatarVideoDimension,
+    height: AvatarVideoDimension,
+  ) {
+    this.avatarVideoConfig.videoWidth = width;
+    this.avatarVideoConfig.videoHeight = height;
+  }
+
+  public setVideoPosition(x: number, y: number) {
+    this.avatarVideoConfig.videoX = x;
+    this.avatarVideoConfig.videoY = y;
+  }
+
+  public setBackground(background: string) {
+    this.background = background;
+    this.createBackgroundElement();
+  }
+
+  public removeBackground() {
+    this.backgroundElement?.remove();
+    this.backgroundElement = undefined;
   }
 
   public destroy() {
