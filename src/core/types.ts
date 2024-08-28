@@ -145,7 +145,7 @@ export type AvatarVideoConfig = {
 };
 
 export type VideoPlayerLayer = {
-  url: string;
+  element: HTMLCanvasElement | HTMLImageElement | HTMLVideoElement;
   x: number;
   y: number;
   height: number;

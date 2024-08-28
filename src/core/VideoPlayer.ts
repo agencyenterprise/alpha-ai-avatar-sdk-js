@@ -29,9 +29,7 @@ export class VideoPlayer {
     videoHeight: 'auto',
   };
 
-  private _layers: (VideoPlayerLayer & {
-    element: HTMLImageElement;
-  })[] = [];
+  private _layers: VideoPlayerLayer[] = [];
 
   constructor(config: VideoPlayerConfig) {
     this.background = config.background;
@@ -238,25 +236,15 @@ export class VideoPlayer {
   }
 
   public addLayer(layer: VideoPlayerLayer) {
-    const extension = layer.url.split('.').pop();
-
-    if (!VALID_IMAGES_EXT.includes(extension!)) {
-      throw new Error(
-        `Invalid layer file, only images (${VALID_IMAGES_EXT.join(',')}) are supported.`,
-      );
+    if (layer.element instanceof HTMLImageElement) {
+      layer.element.crossOrigin = 'anonymous';
     }
 
-    const element = new Image();
+    this._layers.push(layer);
+  }
 
-    element.src = layer.url;
-    element.height = layer.height;
-    element.width = layer.width;
-    element.crossOrigin = 'anonymous';
-
-    this._layers.push({
-      ...layer,
-      element: element,
-    });
+  public updateLayer(index: number, layer: VideoPlayerLayer) {
+    this._layers[index] = layer;
   }
 
   public removeLayer(index: number) {
