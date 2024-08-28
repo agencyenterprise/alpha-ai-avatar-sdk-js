@@ -1,6 +1,7 @@
 import {
   AvatarVideoConfig,
   AvatarVideoDimension,
+  VideoPlayerLayer,
   VideoPlayerConfig,
 } from './types';
 
@@ -21,20 +22,30 @@ export class VideoPlayer {
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
 
-  private avatarVideoConfig: AvatarVideoConfig = {
+  private avatarConfig: AvatarVideoConfig = {
     videoX: 0,
     videoY: 0,
     videoWidth: 'auto',
     videoHeight: 'auto',
   };
 
+  private _layers: (VideoPlayerLayer & {
+    element: HTMLImageElement;
+  })[] = [];
+
   constructor(config: VideoPlayerConfig) {
     this.background = config.background;
     this.videoElement = config.videoElement;
     this.inputVideoElement = document.createElement('video');
 
-    if (config.avatarVideoConfig) {
-      this.avatarVideoConfig = config.avatarVideoConfig;
+    if (config.layers) {
+      for (let i = 0; i < config.layers.length; i++) {
+        this.addLayer(config.layers[i]!);
+      }
+    }
+
+    if (config.avatarConfig) {
+      this.avatarConfig = config.avatarConfig;
     }
 
     /**
@@ -46,6 +57,10 @@ export class VideoPlayer {
     this.renderCanvas();
 
     config.videoTrack?.attach(this.inputVideoElement);
+  }
+
+  get layers() {
+    return this._layers;
   }
 
   private renderCanvas() {
@@ -111,13 +126,13 @@ export class VideoPlayer {
     const width = inputRect.width || DEFAULT_RESOLUTION;
 
     const videoHeight =
-      this.avatarVideoConfig.videoHeight === 'auto'
+      this.avatarConfig.videoHeight === 'auto'
         ? height
-        : this.avatarVideoConfig.videoHeight;
+        : this.avatarConfig.videoHeight;
     const videoWidth =
-      this.avatarVideoConfig.videoWidth === 'auto'
+      this.avatarConfig.videoWidth === 'auto'
         ? width
-        : this.avatarVideoConfig.videoWidth;
+        : this.avatarConfig.videoWidth;
 
     this.canvas.height = height;
     this.canvas.width = width;
@@ -128,8 +143,8 @@ export class VideoPlayer {
       this.canvasContext.drawImage(this.backgroundElement, 0, 0, width, height);
 
       const { data } = this.canvasContext.getImageData(
-        this.avatarVideoConfig.videoX,
-        this.avatarVideoConfig.videoY,
+        this.avatarConfig.videoX,
+        this.avatarConfig.videoY,
         videoWidth,
         videoHeight,
       );
@@ -139,15 +154,15 @@ export class VideoPlayer {
 
     this.canvasContext.drawImage(
       this.inputVideoElement,
-      this.avatarVideoConfig.videoX,
-      this.avatarVideoConfig.videoY,
+      this.avatarConfig.videoX,
+      this.avatarConfig.videoY,
       videoWidth,
       videoHeight,
     );
 
     const videoFrame = this.canvasContext.getImageData(
-      this.avatarVideoConfig.videoX,
-      this.avatarVideoConfig.videoY,
+      this.avatarConfig.videoX,
+      this.avatarConfig.videoY,
       videoWidth,
       videoHeight,
     );
@@ -179,29 +194,73 @@ export class VideoPlayer {
 
     this.canvasContext.putImageData(
       videoFrame,
-      this.avatarVideoConfig.videoX,
-      this.avatarVideoConfig.videoY,
+      this.avatarConfig.videoX,
+      this.avatarConfig.videoY,
     );
+
+    for (let i = 0; i < this._layers.length; i++) {
+      const layer = this._layers[i]!;
+
+      this.canvasContext.drawImage(
+        layer.element,
+        layer.x,
+        layer.y,
+        layer.width,
+        layer.height,
+      );
+    }
 
     requestAnimationFrame(() => this.processVideoFrame());
   }
 
-  public setVideoDimensions(
+  public setAvatarDimensions(
     width: AvatarVideoDimension,
     height: AvatarVideoDimension,
   ) {
-    this.avatarVideoConfig.videoWidth = width;
-    this.avatarVideoConfig.videoHeight = height;
+    if (width === 0 || height === 0) {
+      throw new Error(
+        'Invalid avatar dimensions, width and height must be bigger than 0',
+      );
+    }
+
+    this.avatarConfig.videoWidth = width;
+    this.avatarConfig.videoHeight = height;
   }
 
-  public setVideoPosition(x: number, y: number) {
-    this.avatarVideoConfig.videoX = x;
-    this.avatarVideoConfig.videoY = y;
+  public setAvatarPosition(x: number, y: number) {
+    this.avatarConfig.videoX = x;
+    this.avatarConfig.videoY = y;
   }
 
   public setBackground(background: string) {
     this.background = background;
     this.createBackgroundElement();
+  }
+
+  public addLayer(layer: VideoPlayerLayer) {
+    const extension = layer.url.split('.').pop();
+
+    if (!VALID_IMAGES_EXT.includes(extension!)) {
+      throw new Error(
+        `Invalid layer file, only images (${VALID_IMAGES_EXT.join(',')}) are supported.`,
+      );
+    }
+
+    const element = new Image();
+
+    element.src = layer.url;
+    element.height = layer.height;
+    element.width = layer.width;
+    element.crossOrigin = 'anonymous';
+
+    this._layers.push({
+      ...layer,
+      element: element,
+    });
+  }
+
+  public removeLayer(index: number) {
+    this._layers.splice(index, 1);
   }
 
   public removeBackground() {

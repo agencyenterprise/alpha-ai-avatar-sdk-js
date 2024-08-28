@@ -131,7 +131,8 @@ export type VideoPlayerConfig = {
   videoElement: HTMLVideoElement;
   videoTrack?: RemoteTrack;
   background?: string;
-  avatarVideoConfig?: AvatarVideoConfig;
+  avatarConfig?: AvatarVideoConfig;
+  layers?: VideoPlayerLayer[];
 };
 
 export type AvatarVideoDimension = number | 'auto';
@@ -141,4 +142,12 @@ export type AvatarVideoConfig = {
   videoY: number;
   videoWidth: AvatarVideoDimension;
   videoHeight: AvatarVideoDimension;
+};
+
+export type VideoPlayerLayer = {
+  url: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
 };
