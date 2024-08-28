@@ -127,12 +127,20 @@ export type CreateVideoConfig = {
   ssmlVoiceConfig?: string;
 };
 
+export type AvatarFilter = 'glasses' | 'dog';
+
+// export type LoadedAvatarFilter = {
+//   type: AvatarFilter;
+//   position:
+// }
+
 export type VideoPlayerConfig = {
   videoElement: HTMLVideoElement;
   videoTrack?: RemoteTrack;
   background?: string;
   avatarConfig?: AvatarVideoConfig;
   layers?: VideoPlayerLayer[];
+  filters?: AvatarFilter[];
 };
 
 export type AvatarVideoDimension = number | 'auto';
