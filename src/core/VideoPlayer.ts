@@ -257,11 +257,9 @@ export class VideoPlayer {
   }
 
   public destroy() {
-    if (this.background) {
-      this.inputVideoElement?.remove();
-    }
-
+    this.inputVideoElement?.remove();
     this.backgroundElement?.remove();
     this.canvas?.remove();
+    this._layers = [];
   }
 }
