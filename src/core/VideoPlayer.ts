@@ -37,7 +37,6 @@ export class VideoPlayer {
       this.avatarVideoConfig = config.avatarVideoConfig;
     }
 
-    config.videoTrack?.attach(this.inputVideoElement);
     /**
      * The browser only renders the video if it's attached to the DOM.
      */
@@ -45,6 +44,8 @@ export class VideoPlayer {
       'hidden';
 
     this.renderCanvas();
+
+    config.videoTrack?.attach(this.inputVideoElement);
   }
 
   private renderCanvas() {
@@ -57,11 +58,26 @@ export class VideoPlayer {
     this.videoElement.autoplay = true;
 
     this.createBackgroundElement();
+
+    if (this.backgroundElement) {
+      this.backgroundElement.addEventListener(
+        this.isVideo ? 'loadeddata' : 'load',
+        () => {
+          if (this.isVideo) {
+            (this.backgroundElement as HTMLVideoElement).play();
+          }
+
+          this.processVideoFrame();
+        },
+      );
+    } else {
+      this.processVideoFrame();
+    }
   }
 
   private createBackgroundElement() {
     if (!this.background) {
-      return this.processVideoFrame();
+      return;
     }
 
     const extension = this.background.split('.').pop();
@@ -80,17 +96,6 @@ export class VideoPlayer {
     } else {
       throw new Error('Invalid background file');
     }
-
-    this.backgroundElement.addEventListener(
-      this.isVideo ? 'loadeddata' : 'load',
-      () => {
-        if (this.isVideo) {
-          (this.backgroundElement as HTMLVideoElement).play();
-        }
-
-        this.processVideoFrame();
-      },
-    );
   }
 
   private processVideoFrame() {
@@ -98,23 +103,12 @@ export class VideoPlayer {
       return;
     }
 
+    this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
     const inputRect = this.inputVideoElement.getBoundingClientRect();
 
     const height = inputRect.height || DEFAULT_RESOLUTION;
     const width = inputRect.width || DEFAULT_RESOLUTION;
-
-    this.canvas.height = height;
-    this.canvas.width = width;
-
-    let bgData = null;
-
-    if (this.backgroundElement) {
-      this.canvasContext.drawImage(this.backgroundElement, 0, 0, width, height);
-
-      const { data } = this.canvasContext.getImageData(0, 0, width, height);
-
-      bgData = data;
-    }
 
     const videoHeight =
       this.avatarVideoConfig.videoHeight === 'auto'
@@ -125,6 +119,24 @@ export class VideoPlayer {
         ? width
         : this.avatarVideoConfig.videoWidth;
 
+    this.canvas.height = height;
+    this.canvas.width = width;
+
+    let bgData = null;
+
+    if (this.backgroundElement) {
+      this.canvasContext.drawImage(this.backgroundElement, 0, 0, width, height);
+
+      const { data } = this.canvasContext.getImageData(
+        this.avatarVideoConfig.videoX,
+        this.avatarVideoConfig.videoY,
+        videoWidth,
+        videoHeight,
+      );
+
+      bgData = data;
+    }
+
     this.canvasContext.drawImage(
       this.inputVideoElement,
       this.avatarVideoConfig.videoX,
@@ -134,8 +146,8 @@ export class VideoPlayer {
     );
 
     const videoFrame = this.canvasContext.getImageData(
-      0,
-      0,
+      this.avatarVideoConfig.videoX,
+      this.avatarVideoConfig.videoY,
       videoWidth,
       videoHeight,
     );
@@ -165,7 +177,11 @@ export class VideoPlayer {
       }
     }
 
-    this.canvasContext.putImageData(videoFrame, 0, 0);
+    this.canvasContext.putImageData(
+      videoFrame,
+      this.avatarVideoConfig.videoX,
+      this.avatarVideoConfig.videoY,
+    );
 
     requestAnimationFrame(() => this.processVideoFrame());
   }
