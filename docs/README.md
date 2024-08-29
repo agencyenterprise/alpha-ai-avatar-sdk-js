@@ -21,6 +21,40 @@ const client = new AvatarClient({
 
 ### Methods
 
+- **`init`**: Init the avatar client, it's required a <video> element or / and an <audio> element.
+
+    ```javascript
+    client.init({
+      videoElement: videoElement
+    }, audioElement)
+
+    ```
+    - **`background`**: A URL of the background (can be an image or a video) to be applied on the avatar (only work with avatars that has green screen).
+    - **`avatarConfig`**: With the avatarConfig you can configure the position and the dimension of the avatar inside the video.
+    - **`layers`**: You can apply layers into the video by passing an <img>, <video> or a <canvas>
+
+    ```javascript
+    client.init({
+      videoElement: videoElement,
+      background: 'https://example.com/image.jpg',
+      avatarConfig: {
+        videoX: 60,
+        videoY: 80,
+        videoWidth: 254,
+        videoHeight: 254,
+      },
+      layers: [
+        {
+          element: imageElement,
+          x: 20,
+          y: 20,
+          height: 64,
+          width: 64
+        }
+      ]
+    })
+    ```
+
 - **`connect`**: Connect to the room.
 
     ```javascript

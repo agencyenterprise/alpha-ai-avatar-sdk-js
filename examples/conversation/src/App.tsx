@@ -16,7 +16,12 @@ export function App() {
 
   useEffect(() => {
     if (videoRef.current && audioRef.current) {
-      avatar.init(videoRef.current, audioRef.current);
+      avatar.init(
+        {
+          videoElement: videoRef.current,
+        },
+        audioRef.current,
+      );
     }
 
     return () => {
