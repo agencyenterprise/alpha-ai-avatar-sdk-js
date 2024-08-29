@@ -1,5 +1,5 @@
 // Types
-export type * from './core/types';
+export * from './core/types';
 
 // Classes
 export { AvatarClient } from './core/AvatarClient';
@@ -9,8 +9,14 @@ export { RemoteTrack, Room, RoomEvent, Track } from 'livekit-client';
 
 // Plugins
 export {
-  AzureSpeechRecognition, ClaudeAIClient, ClaudeContent, ClaudeResponse,
-  ClaudeUsage, Debate,
+  AzureSpeechRecognition,
+  ClaudeAIClient,
+  ClaudeContent,
+  ClaudeResponse,
+  ClaudeUsage,
+  Debate,
   DebateHistory,
-  DebateOptions, MessageParam, OpenAIClient
+  DebateOptions,
+  MessageParam,
+  OpenAIClient,
 } from './plugins';
