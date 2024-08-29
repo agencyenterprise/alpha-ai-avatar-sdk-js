@@ -120,3 +120,77 @@ const client = new AvatarClient({
   ```
 
 - **`disconnect`**: Disconnect the avatar.
+
+## VideoPlayer
+
+You can create a more immersive experience by manipulating the video using the VideoPlayer instance, the section bellow will explain how to it's methods.
+
+*To interact with the instance you'll need to initialize the AvatarClient first*.
+
+### Methods
+
+- **`setAvatarDimensions`**: Change the width and height of the avatar inside the video. You can set any dimension to `auto` to make it fill the available space.
+
+  ```javascript
+  client.videoPlayer.setAvatarDimensions(
+    254, // width
+    254, // height
+  );
+  ```
+
+- **`setAvatarPosition`**: Change the position of the avatar inside the video.
+
+  ```javascript
+  client.videoPlayer.setAvatarPosition(
+    60, // X
+    60, // Y
+  );
+  ```
+
+- **`setBackground`**: Update the background of the video, works only with avatars with green screen, it supports image and video.
+
+  ```javascript
+  client.videoPlayer.setBackground(
+    'https://example/video.mp4'
+  );
+  ```
+
+- **`removeBackground`**: You can remove a background using this method
+
+  ```javascript
+  client.videoPlayer.removeBackground();
+  ```
+
+- **`addLayer`**: Add a layer above the video, it can be a `<img>`, `<video>` or `<canvas>`. 
+
+  ```javascript
+  client.videoPlayer.addLayer({
+    element: imageElement,
+    x: 60,
+    y: 60,
+    height: 64,
+    width: 64
+  });
+  ```
+
+- **`updateLayer`**: You can update a single layer passing his `index`, it's useful if you want to move layers around without using css.
+
+  ```javascript
+  client.videoPlayer.updateLayer(0, {
+    element: imageElement,
+    x: 60,
+    y: 60,
+    height: 64,
+    width: 64
+  });
+  ```
+
+- **`removeLayer`**: You can remove a single layer by passing his `index`.
+
+  ```javascript
+  client.videoPlayer.removeLayer(0);
+  ```
+
+### Properties
+
+- **`layers`**: Get the array of the active layers, you can use to know the index to remove and update a layer.
