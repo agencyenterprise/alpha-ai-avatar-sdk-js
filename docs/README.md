@@ -27,11 +27,11 @@ const client = new AvatarClient({
     client.init({
       videoElement: videoElement
     }, audioElement)
-
     ```
-    - **`background`**: A URL of the background (can be an image or a video) to be applied on the avatar (only work with avatars that has green screen).
-    - **`avatarConfig`**: With the avatarConfig you can configure the position and the dimension of the avatar inside the video.
-    - **`layers`**: You can apply layers into the video by passing an <img>, <video> or a <canvas>
+
+  - **`background`**: A URL of the background (can be an image or a video) to be applied on the avatar (only work with avatars that has green screen).
+  - **`avatarConfig`**: With the avatarConfig you can configure the position and the dimension of the avatar inside the video.
+  - **`layers`**: You can apply layers into the video by passing an <img>, <video> or a <canvas>
 
     ```javascript
     client.init({
