@@ -52,16 +52,16 @@ export class VideoPlayer {
     document.body.appendChild(this.inputVideoElement).style.visibility =
       'hidden';
 
-    this.renderCanvas();
-
-    config.videoTrack?.attach(this.inputVideoElement);
+    this.renderCanvas().then(() => {
+      config.videoTrack?.attach(this.inputVideoElement);
+    });
   }
 
   get layers() {
     return this._layers;
   }
 
-  private renderCanvas() {
+  private async renderCanvas() {
     this.canvas = document.createElement('canvas');
     this.canvasContext = this.canvas.getContext('2d', {
       willReadFrequently: true,
@@ -70,7 +70,7 @@ export class VideoPlayer {
     this.videoElement.muted = true;
     this.videoElement.autoplay = true;
 
-    this.createBackgroundElement();
+    await this.createBackgroundElement();
 
     if (this.backgroundElement) {
       this.backgroundElement.addEventListener(
@@ -88,21 +88,25 @@ export class VideoPlayer {
     }
   }
 
-  private createBackgroundElement() {
+  private async createBackgroundElement() {
     if (!this.background) {
       return;
     }
 
-    const extension = this.background.split('.').pop();
+    const fileType = await this.getURLFileType(this.background);
 
-    if (VALID_VIDEOS_EXT.includes(extension!)) {
+    if (fileType === 'video') {
       this.backgroundElement = document.createElement('video');
       this.backgroundElement.src = this.background;
       this.backgroundElement.loop = true;
       this.backgroundElement.muted = true;
       this.backgroundElement.autoplay = true;
       this.isVideo = true;
-    } else if (VALID_IMAGES_EXT.includes(extension!)) {
+
+      this.backgroundElement.addEventListener('loadeddata', () => {
+        (this.backgroundElement as HTMLVideoElement)?.play();
+      });
+    } else if (fileType === 'image') {
       this.backgroundElement = new Image();
       this.backgroundElement.crossOrigin = 'anonymous';
       this.backgroundElement.src = this.background;
@@ -254,6 +258,29 @@ export class VideoPlayer {
   public removeBackground() {
     this.backgroundElement?.remove();
     this.backgroundElement = undefined;
+  }
+
+  public async getURLFileType(url: string) {
+    if (url.startsWith('data:')) {
+      return url.includes('image') ? 'image' : 'video';
+    }
+
+    const response = await fetch(url, {
+      method: 'HEAD',
+    });
+
+    const contentType = response.headers.get('content-type');
+    const ext = contentType && contentType.split('/').pop();
+
+    if (ext && VALID_VIDEOS_EXT.includes(ext)) {
+      return 'video';
+    }
+
+    if (ext && VALID_IMAGES_EXT.includes(ext)) {
+      return 'image';
+    }
+
+    throw new Error('Invalid content type');
   }
 
   public destroy() {
