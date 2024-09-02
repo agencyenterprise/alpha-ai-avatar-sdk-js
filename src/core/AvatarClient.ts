@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { RemoteTrack, Room, RoomEvent } from 'livekit-client';
+import { ConnectionState, RemoteTrack, Room, RoomEvent } from 'livekit-client';
 import { HTTPClient } from './HTTPClient';
 import {
   AvatarClientConfig,
@@ -68,7 +68,7 @@ export class AvatarClient extends HTTPClient {
   }
 
   get isConnected() {
-    return !!this.room;
+    return !!this.room && this.room.state === ConnectionState.Connected;
   }
 
   get isSpeaking() {
