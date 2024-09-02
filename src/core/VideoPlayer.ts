@@ -13,8 +13,8 @@ const GREEN_SCALE_HIGH: [number, number, number] = [180, 255, 180];
 const DEFAULT_RESOLUTION = 512;
 
 export class VideoPlayer {
-  private inputVideoElement: HTMLVideoElement;
-  private videoElement: HTMLVideoElement;
+  private readonly inputVideoElement: HTMLVideoElement;
+  private readonly videoElement: HTMLVideoElement;
 
   private background?: string;
   private isVideo: boolean = false;
