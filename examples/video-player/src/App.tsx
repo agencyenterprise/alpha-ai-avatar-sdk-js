@@ -173,7 +173,7 @@ export function App() {
         <audio ref={audioRef} style={{ display: 'none' }} autoPlay muted />
         <Button
           onClick={async () => {
-            await avatar.connect(7);
+            await avatar.connect();
             avatar.enableMicrophone();
             setIsConnected(true);
           }}>

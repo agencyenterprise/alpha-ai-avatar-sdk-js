@@ -205,8 +205,8 @@ export class VideoPlayer {
 
       this.canvasContext.drawImage(
         layer.element,
-        layer.x,
-        layer.y,
+        layer.x || 0,
+        layer.y || 0,
         layer.width,
         layer.height,
       );
