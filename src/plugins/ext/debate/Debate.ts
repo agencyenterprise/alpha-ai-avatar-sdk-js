@@ -80,8 +80,18 @@ export class Debate {
     audioRefB: HTMLAudioElement,
   ) {
     if (this.avatarClientA && this.avatarClientB) {
-      this.avatarClientA.init(videoRefA, audioRefA);
-      this.avatarClientB.init(videoRefB, audioRefB);
+      this.avatarClientA.init(
+        {
+          videoElement: videoRefA,
+        },
+        audioRefA,
+      );
+      this.avatarClientB.init(
+        {
+          videoElement: videoRefB,
+        },
+        audioRefB,
+      );
 
       await this.avatarClientA.connect();
       await this.avatarClientB.connect();

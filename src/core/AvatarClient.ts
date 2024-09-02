@@ -11,8 +11,10 @@ import {
   MessageType,
   ParsedMessage,
   Prompt,
+  VideoPlayerConfig,
   SayOptions,
 } from './types';
+import { VideoPlayer } from './VideoPlayer';
 
 export class AvatarClient extends HTTPClient {
   private room?: Room;
@@ -22,8 +24,9 @@ export class AvatarClient extends HTTPClient {
   private conversational: boolean = false;
   private initialPrompt?: Prompt[];
 
-  private videoElement?: HTMLVideoElement;
   private audioElement?: HTMLAudioElement;
+  private _videoPlayer?: VideoPlayer;
+  private videoPlayerConfig?: VideoPlayerConfig;
 
   private eventEmitter: EventEmitter;
 
@@ -35,9 +38,13 @@ export class AvatarClient extends HTTPClient {
     this.eventEmitter = new EventEmitter();
   }
 
-  async init(videoElement: HTMLVideoElement, audioElement: HTMLAudioElement) {
-    this.videoElement = videoElement;
+  async init(
+    videoPlayerConfig: VideoPlayerConfig,
+    audioElement: HTMLAudioElement,
+  ) {
     this.audioElement = audioElement;
+    this.videoPlayerConfig = videoPlayerConfig;
+
     await this.fetchAvatars();
   }
 
@@ -66,6 +73,10 @@ export class AvatarClient extends HTTPClient {
 
   get isSpeaking() {
     return this.isAvatarSpeaking;
+  }
+
+  public get videoPlayer() {
+    return this._videoPlayer;
   }
 
   getAvatars() {
@@ -149,8 +160,9 @@ export class AvatarClient extends HTTPClient {
   }
 
   private handleTrackSubscribed(track: RemoteTrack) {
-    if (track.kind === 'video' && this.videoElement) {
-      track.attach(this.videoElement);
+    if (track.kind === 'video' && this.videoPlayerConfig?.videoElement) {
+      this.videoPlayerConfig.videoTrack = track;
+      this._videoPlayer = new VideoPlayer(this.videoPlayerConfig);
     } else if (track.kind === 'audio' && this.audioElement) {
       track.attach(this.audioElement);
     }
@@ -158,6 +170,10 @@ export class AvatarClient extends HTTPClient {
 
   private handleTrackUnsubscribed(track: RemoteTrack) {
     track.detach();
+
+    if (track.kind === 'video') {
+      this._videoPlayer?.destroy();
+    }
   }
 
   private handleDataReceived(data: Uint8Array) {

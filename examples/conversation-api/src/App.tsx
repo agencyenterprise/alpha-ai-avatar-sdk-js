@@ -25,7 +25,12 @@ export function App() {
     };
 
     if (videoRef.current && audioRef.current) {
-      avatar.init(videoRef.current, audioRef.current);
+      avatar.init(
+        {
+          videoElement: videoRef.current,
+        },
+        audioRef.current,
+      );
     }
 
     avatar.addEventListener(
