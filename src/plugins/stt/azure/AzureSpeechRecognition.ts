@@ -60,23 +60,19 @@ export class AzureSpeechRecognition {
 
   async stop() {
     if (this.recognizer) {
-      try {
-        await new Promise<void>((resolve, reject) => {
-          this.recognizer!.stopContinuousRecognitionAsync(
-            () => {
-              this.recognizer!.close();
-              this.recognizer = undefined;
-              resolve();
-            },
-            (error) => {
-              console.error('Error stopping continuous recognition:', error);
-              reject(error);
-            },
-          );
-        });
-      } catch (error) {
-        console.error('Error in stop method:', error);
-      }
+      await new Promise<void>((resolve) => {
+        this.recognizer!.stopContinuousRecognitionAsync(
+          () => {
+            this.recognizer!.close();
+            this.recognizer = undefined;
+            resolve();
+          },
+          (error) => {
+            console.error('Error stopping continuous recognition:', error);
+            resolve();
+          },
+        );
+      });
     }
   }
 }
