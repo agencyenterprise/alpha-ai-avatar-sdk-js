@@ -32,10 +32,17 @@ export function App() {
 
   useEffect(() => {
     if (isConnected) {
-      stt.start('SUBSCRIPTION_KEY', 'REGION', (transcript) => {
-        avatar.say(transcript);
-        console.log(transcript);
-      });
+      stt.start(
+        'SUBSCRIPTION_KEY',
+        'REGION',
+        (transcript) => {
+          avatar.say(transcript);
+          console.log(transcript);
+        },
+        () => {
+          console.log('Speech recognition ended');
+        },
+      );
     }
   }, [isConnected]);
 
