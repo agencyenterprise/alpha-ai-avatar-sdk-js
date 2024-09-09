@@ -4,6 +4,7 @@ export declare type AvatarClientConfig = {
   apiKey: string;
   baseUrl?: string;
   avatarId?: number;
+  landmarks?: boolean;
   conversational?: boolean;
   initialPrompt?: Prompt[];
 };
@@ -54,6 +55,7 @@ export enum MessageType {
   State = 1,
   Error = 2,
   TranscriberState = 3,
+  Landmarks = 4,
 }
 
 export enum TranscriberStatus {
@@ -93,6 +95,14 @@ export type TranscriberStatusMessage = {
   type: MessageType.TranscriberState;
 };
 
+export type LandmarksMessage = {
+  data: {
+    state: MessageState.Active;
+    message: string;
+  };
+  type: MessageType.Landmarks;
+};
+
 export type StateMessage = IdleStateMessage | SpeakingStateMessage;
 
 export type ErrorMessage = {
@@ -106,7 +116,13 @@ export type ParsedMessage =
   | TranscriptMessage
   | StateMessage
   | ErrorMessage
-  | TranscriberStatusMessage;
+  | TranscriberStatusMessage
+  | LandmarksMessage;
+
+export type Landmarks = {
+  x: number;
+  y: number;
+}[];
 
 export type Prompt = {
   role: string;

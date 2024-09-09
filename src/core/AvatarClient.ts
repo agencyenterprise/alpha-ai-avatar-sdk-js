@@ -13,6 +13,7 @@ import {
   Prompt,
   VideoPlayerConfig,
   SayOptions,
+  Landmarks,
 } from './types';
 import { VideoPlayer } from './VideoPlayer';
 
@@ -21,6 +22,7 @@ export class AvatarClient extends HTTPClient {
   private avatarId?: number;
   private isAvatarSpeaking: boolean = false;
   private avatarsAvailable: Avatars = [];
+  private landmarks: boolean = false;
   private conversational: boolean = false;
   private initialPrompt?: Prompt[];
 
@@ -33,6 +35,7 @@ export class AvatarClient extends HTTPClient {
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
     this.avatarId = config.avatarId;
+    this.landmarks = config.landmarks ?? false;
     this.conversational = config.conversational ?? false;
     this.initialPrompt = config.initialPrompt;
     this.eventEmitter = new EventEmitter();
@@ -51,6 +54,7 @@ export class AvatarClient extends HTTPClient {
   async connect(avatarId?: number) {
     const { serverUrl, token } = await this.post<CreateRoomResponse>('/rooms', {
       avatarId: avatarId ?? this.avatarId,
+      landmarks: this.landmarks,
       conversational: this.conversational,
       initialPrompt: this.initialPrompt,
     });
@@ -192,6 +196,13 @@ export class AvatarClient extends HTTPClient {
 
     if (message.type === MessageType.TranscriberState) {
       this.eventEmitter.emit('transcriberStatusChange', message.data.status);
+    }
+
+    if (message.type === MessageType.Landmarks) {
+      this.eventEmitter.emit('landmarks', {
+        state: message.data.state,
+        message: JSON.parse(message.data.message) as Landmarks,
+      });
     }
   }
 

@@ -1,9 +1,15 @@
-import { AvatarClient, TranscriberStatus } from 'alpha-ai-avatar-sdk-js';
+import {
+  AvatarClient,
+  Landmarks,
+  TranscriberStatus,
+} from 'alpha-ai-avatar-sdk-js';
 import { Button } from './Button';
 import { useEffect, useRef, useState } from 'react';
 
 const avatar = new AvatarClient({
-  apiKey: 'API_KEY',
+  apiKey: 'qwmran1fyeedsiod',
+  baseUrl: 'http://localhost:5001',
+  landmarks: true,
   conversational: true,
   initialPrompt: [
     {
@@ -15,6 +21,9 @@ const avatar = new AvatarClient({
 
 export function App() {
   const [isConnected, setIsConnected] = useState(avatar.isConnected);
+  const [messages, setMessages] = useState<{ message: string; role: string }[]>(
+    [],
+  );
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -33,10 +42,28 @@ export function App() {
       );
     }
 
+    const transcriptionHandler = (transcription: {
+      message: string;
+      role: string;
+      isFinal: boolean;
+    }) => {
+      console.log('Transcription', transcription);
+      if (transcription.isFinal) {
+        setMessages((prev) => [...prev, transcription]);
+        return;
+      }
+    };
+
+    const landmakrsHandler = (landmarks: Landmarks) => {
+      console.log('Landmarks', landmarks);
+    };
+
     avatar.addEventListener(
       'transcriberStatusChange',
       transcriberStatusHandler,
     );
+    avatar.addEventListener('transcription', transcriptionHandler);
+    avatar.addEventListener('landmarks', landmakrsHandler);
 
     return () => {
       avatar.disconnect();
@@ -44,6 +71,7 @@ export function App() {
         'transcriberStatusChange',
         transcriberStatusHandler,
       );
+      avatar.removeEventListener('landmarks', landmakrsHandler);
     };
   }, []);
 
@@ -69,10 +97,16 @@ export function App() {
             </Button>
             <Button
               onClick={async () => {
-                await avatar.switchAvatar(20);
+                await avatar.switchAvatar(9);
                 setIsConnected(true);
               }}>
               Switch
+            </Button>
+            <Button
+              onClick={() => {
+                avatar.enableMicrophone();
+              }}>
+              Enable Microphone
             </Button>
             <Button
               onClick={() => {
@@ -86,12 +120,26 @@ export function App() {
           <Button
             onClick={async () => {
               await avatar.connect();
-              avatar.enableMicrophone();
               setIsConnected(true);
             }}>
             Connect
           </Button>
         )}
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          marginTop: '20px',
+        }}>
+        {messages.map((message, index) => (
+          <div key={index}>
+            <span>{message.role}: </span>
+            <span>{message.message}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
