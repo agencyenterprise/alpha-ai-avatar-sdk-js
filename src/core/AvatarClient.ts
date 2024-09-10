@@ -14,8 +14,11 @@ import {
   VideoPlayerConfig,
   SayOptions,
   Landmarks,
+  AvatarAttribute,
+  PresetAttribute,
 } from './types';
 import { VideoPlayer } from './VideoPlayer';
+import { drawGlasses, drawHat, drawMustache } from './customizations';
 
 export class AvatarClient extends HTTPClient {
   private room?: Room;
@@ -29,14 +32,17 @@ export class AvatarClient extends HTTPClient {
   private audioElement?: HTMLAudioElement;
   private _videoPlayer?: VideoPlayer;
   private videoPlayerConfig?: VideoPlayerConfig;
+  private canvas: HTMLCanvasElement | null = null;
+  private ctx: CanvasRenderingContext2D | null = null;
 
   private currentLandmarks: Landmarks = [];
   private targetLandmarks: Landmarks = [];
   private lerpFactor: number = 0.1;
   private isLerpingActive: boolean = false;
-  private lerpIntervalId: number | null = null;
+  private animationFrameId: number | null = null;
   private readonly LERP_THRESHOLD: number = 0.001;
 
+  private attributes: Map<string, AvatarAttribute> = new Map();
   private eventEmitter: EventEmitter;
 
   constructor(config: AvatarClientConfig) {
@@ -51,9 +57,12 @@ export class AvatarClient extends HTTPClient {
   async init(
     videoPlayerConfig: VideoPlayerConfig,
     audioElement: HTMLAudioElement,
+    canvas?: HTMLCanvasElement,
   ) {
     this.audioElement = audioElement;
     this.videoPlayerConfig = videoPlayerConfig;
+    this.canvas = canvas ?? null;
+    this.ctx = canvas?.getContext('2d') ?? null;
 
     await this.fetchAvatars();
   }
@@ -88,6 +97,10 @@ export class AvatarClient extends HTTPClient {
 
   public get videoPlayer() {
     return this._videoPlayer;
+  }
+
+  get attributesList() {
+    return this.attributes;
   }
 
   getAvatars() {
@@ -154,8 +167,34 @@ export class AvatarClient extends HTTPClient {
     }
   }
 
+  async addAttribute(
+    name: string,
+    imageSrc: string,
+    drawFunction?: (
+      ctx: CanvasRenderingContext2D,
+      landmarks: Landmarks,
+      image: HTMLImageElement,
+    ) => void,
+  ) {
+    const image = new Image();
+    image.src = imageSrc;
+    await new Promise((resolve) => {
+      image.onload = resolve;
+    });
+
+    this.attributes.set(name, {
+      image,
+      draw: drawFunction || this.getPresetDrawFunction(name as PresetAttribute),
+    });
+  }
+
+  removeAttribute(name: string) {
+    this.attributes.delete(name);
+  }
+
   disconnect() {
     this.stopLerping();
+    this.clearRect();
     this.removeRoomListeners();
     this.room?.disconnect();
     this.room = undefined;
@@ -168,9 +207,8 @@ export class AvatarClient extends HTTPClient {
   private startLerping() {
     if (!this.isLerpingActive) {
       this.isLerpingActive = true;
-      this.lerpIntervalId = window.setInterval(
-        () => this.updateAndEmitLerpedLandmarks(),
-        1000 / 60,
+      this.animationFrameId = requestAnimationFrame(
+        this.updateAndEmitLerpedLandmarks.bind(this),
       );
     }
   }
@@ -178,11 +216,46 @@ export class AvatarClient extends HTTPClient {
   private stopLerping() {
     if (this.isLerpingActive) {
       this.isLerpingActive = false;
-      if (this.lerpIntervalId !== null) {
-        window.clearInterval(this.lerpIntervalId);
-        this.lerpIntervalId = null;
+      if (this.animationFrameId !== null) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
       }
     }
+  }
+
+  private getPresetDrawFunction(
+    preset: PresetAttribute,
+  ): (
+    ctx: CanvasRenderingContext2D,
+    landmarks: Landmarks,
+    image: HTMLImageElement,
+  ) => void {
+    switch (preset) {
+      case 'glasses':
+        return drawGlasses;
+      case 'hat':
+        return drawHat;
+      case 'mustache':
+        return drawMustache;
+      default:
+        return () => {};
+    }
+  }
+
+  private drawAttributes(landmarks: Landmarks) {
+    if (!this.ctx || !this.canvas) return;
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    for (const [_, attribute] of this.attributes.entries()) {
+      attribute.draw(this.ctx, landmarks, attribute.image);
+    }
+  }
+
+  private clearRect() {
+    if (!this.ctx || !this.canvas) return;
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   private setupRoomListeners() {
@@ -291,6 +364,10 @@ export class AvatarClient extends HTTPClient {
         state: MessageState.Active,
         message: this.currentLandmarks,
       });
+      this.drawAttributes(this.currentLandmarks);
+      this.animationFrameId = requestAnimationFrame(
+        this.updateAndEmitLerpedLandmarks.bind(this),
+      );
     } else {
       this.stopLerping();
     }

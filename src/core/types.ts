@@ -167,3 +167,14 @@ export type VideoPlayerLayer = {
   height: number;
   width: number;
 };
+
+export type AvatarAttribute = {
+  image: HTMLImageElement;
+  draw: (
+    ctx: CanvasRenderingContext2D,
+    landmarks: Landmarks,
+    image: HTMLImageElement,
+  ) => void;
+};
+
+export type PresetAttribute = 'glasses' | 'hat' | 'mustache';

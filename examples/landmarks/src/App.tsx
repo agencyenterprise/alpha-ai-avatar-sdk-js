@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AvatarClient, Landmarks } from 'alpha-ai-avatar-sdk-js';
+import { useEffect, useRef, useState } from 'react';
+import { AvatarClient } from 'alpha-ai-avatar-sdk-js';
 import glassesImage from './assets/glasses.png';
+import hatImage from './assets/hat.png';
+import mustacheImage from './assets/mustache.png';
 import { Button } from './Button';
 
 const avatar = new AvatarClient({
@@ -17,102 +19,44 @@ const avatar = new AvatarClient({
 
 export function App() {
   const [isConnected, setIsConnected] = useState(avatar.isConnected);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-  const [glasses, setGlasses] = useState<HTMLImageElement | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-
-  const loadImage = useCallback(() => {
-    const img = new Image();
-    img.src = glassesImage;
-    img.onload = () => {
-      setGlasses(img);
-      setImagesLoaded(true);
-    };
-  }, []);
 
   useEffect(() => {
-    loadImage();
-  }, [loadImage]);
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      ctxRef.current = canvasRef.current.getContext('2d');
-    }
-  }, []);
-
-  const drawGlasses = useCallback(
-    (landmarks: Landmarks) => {
-      if (!imagesLoaded || !ctxRef.current || !glasses) {
-        console.log('Images not loaded or context not available');
-        return;
+    const initializeAvatar = async () => {
+      if (videoRef.current && audioRef.current && canvasRef.current) {
+        await avatar.init(
+          {
+            videoElement: videoRef.current,
+          },
+          audioRef.current,
+          canvasRef.current,
+        );
       }
-
-      const ctx = ctxRef.current;
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-      const leftEye = landmarks[133];
-      const rightEye = landmarks[362];
-      const noseTop = landmarks[6];
-
-      if (!leftEye || !rightEye || !noseTop) {
-        console.error('Required landmarks not detected');
-        return;
-      }
-
-      const eyeDistance = Math.hypot(
-        rightEye.x - leftEye.x,
-        rightEye.y - leftEye.y,
-      );
-      const glassesWidth = eyeDistance * 3.8;
-      const glassesHeight = glassesWidth * (glasses.height / glasses.width);
-      const glassesX = leftEye.x - glassesWidth * 0.25;
-      const glassesY = noseTop.y - glassesHeight * 0.5;
-
-      ctx.drawImage(
-        glasses,
-        glassesX - 27,
-        glassesY,
-        glassesWidth,
-        glassesHeight,
-      );
-    },
-    [glasses, imagesLoaded],
-  );
-
-  useEffect(() => {
-    const landmarksHandler = (landmarks: {
-      state: number;
-      message: Landmarks;
-    }) => {
-      drawGlasses(landmarks.message);
     };
 
-    if (videoRef.current && audioRef.current) {
-      avatar.init(
-        {
-          videoElement: videoRef.current,
-        },
-        audioRef.current,
-      );
-    }
-
-    avatar.addEventListener('landmarks', landmarksHandler);
+    initializeAvatar();
 
     return () => {
       avatar.disconnect();
-      avatar.removeEventListener('landmarks', landmarksHandler);
     };
-  }, [drawGlasses]);
-
-  const clearRect = useCallback(() => {
-    if (ctxRef.current) {
-      ctxRef.current.clearRect(0, 0, 512, 512);
-    }
   }, []);
+
+  const toggleAttribute = async (name: string) => {
+    if (avatar.attributesList.has(name)) {
+      avatar.removeAttribute(name);
+    } else {
+      const imageSrc =
+        name === 'glasses'
+          ? glassesImage
+          : name === 'hat'
+            ? hatImage
+            : mustacheImage;
+      await avatar.addAttribute(name, imageSrc);
+    }
+  };
 
   return (
     <div
@@ -153,11 +97,17 @@ export function App() {
             <Button onClick={() => avatar.enableMicrophone()}>
               Enable Microphone
             </Button>
+            <Button onClick={() => toggleAttribute('glasses')}>
+              Toggle Glasses
+            </Button>
+            <Button onClick={() => toggleAttribute('hat')}>Toggle Hat</Button>
+            <Button onClick={() => toggleAttribute('mustache')}>
+              Toggle Mustache
+            </Button>
             <Button
               onClick={() => {
                 avatar.disconnect();
                 setIsConnected(false);
-                clearRect();
               }}>
               Disconnect
             </Button>
