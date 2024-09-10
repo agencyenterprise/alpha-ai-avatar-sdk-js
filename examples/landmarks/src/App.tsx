@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AvatarClient, Landmarks } from 'alpha-ai-avatar-sdk-js';
+import glassesImage from './assets/sunglasses.png';
 import { Button } from './Button';
 
 const avatar = new AvatarClient({
@@ -16,17 +17,78 @@ const avatar = new AvatarClient({
 
 export function App() {
   const [isConnected, setIsConnected] = useState(avatar.isConnected);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [glasses, setGlasses] = useState<HTMLImageElement | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+
+  const loadImage = useCallback(() => {
+    const img = new Image();
+    img.src = glassesImage;
+    img.onload = () => {
+      setGlasses(img);
+      setImagesLoaded(true);
+    };
+  }, []);
+
+  useEffect(() => {
+    loadImage();
+  }, [loadImage]);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      ctxRef.current = canvasRef.current.getContext('2d');
+    }
+  }, []);
+
+  const drawGlasses = useCallback(
+    (landmarks: Landmarks) => {
+      if (!imagesLoaded || !ctxRef.current || !glasses) {
+        console.log('Images not loaded or context not available');
+        return;
+      }
+
+      const ctx = ctxRef.current;
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+      const leftEye = landmarks[133];
+      const rightEye = landmarks[362];
+      const noseTop = landmarks[6];
+
+      if (!leftEye || !rightEye || !noseTop) {
+        console.error('Required landmarks not detected');
+        return;
+      }
+
+      const eyeDistance = Math.hypot(
+        rightEye.x - leftEye.x,
+        rightEye.y - leftEye.y,
+      );
+      const glassesWidth = eyeDistance * 3.8;
+      const glassesHeight = glassesWidth * (glasses.height / glasses.width);
+      const glassesX = leftEye.x - glassesWidth * 0.25;
+      const glassesY = noseTop.y - glassesHeight * 0.5;
+
+      ctx.drawImage(
+        glasses,
+        glassesX - 27,
+        glassesY,
+        glassesWidth,
+        glassesHeight,
+      );
+    },
+    [glasses, imagesLoaded],
+  );
 
   useEffect(() => {
     const landmarksHandler = (landmarks: {
       state: number;
       message: Landmarks;
     }) => {
-      drawClownNose(landmarks.message);
+      drawGlasses(landmarks.message);
     };
 
     if (videoRef.current && audioRef.current) {
@@ -44,27 +106,13 @@ export function App() {
       avatar.disconnect();
       avatar.removeEventListener('landmarks', landmarksHandler);
     };
-  }, []);
+  }, [drawGlasses]);
 
-  const drawClownNose = (landmarks: Landmarks) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const noseTip = landmarks[4];
-
-    if (noseTip && ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      ctx.beginPath();
-      ctx.arc(noseTip.x, noseTip.y, 40, 0, 2 * Math.PI);
-      ctx.fillStyle = 'red';
-      ctx.fill();
-      ctx.strokeStyle = 'darkred';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+  const clearRect = useCallback(() => {
+    if (ctxRef.current) {
+      ctxRef.current.clearRect(0, 0, 512, 512);
     }
-  };
+  }, []);
 
   return (
     <div
@@ -109,14 +157,7 @@ export function App() {
               onClick={() => {
                 avatar.disconnect();
                 setIsConnected(false);
-
-                const canvas = canvasRef.current;
-                if (!canvas) return;
-
-                const ctx = canvas.getContext('2d');
-                if (!ctx) return;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                clearRect();
               }}>
               Disconnect
             </Button>
