@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AvatarClient, Landmarks } from 'alpha-ai-avatar-sdk-js';
-import glassesImage from './assets/sunglasses.png';
+import glassesImage from './assets/glasses.png';
 import { Button } from './Button';
 
 const avatar = new AvatarClient({
@@ -165,7 +165,7 @@ export function App() {
         ) : (
           <Button
             onClick={async () => {
-              await avatar.connect(9);
+              await avatar.connect();
               setIsConnected(true);
             }}>
             Connect
