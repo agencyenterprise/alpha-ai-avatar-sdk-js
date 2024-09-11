@@ -3,7 +3,7 @@ import { Button } from './Button';
 import { useEffect, useRef, useState } from 'react';
 
 const avatar = new AvatarClient({
-    apiKey: 'API_KEY',
+  apiKey: 'API_KEY',
   conversational: true,
   initialPrompt: [
     {
@@ -76,6 +76,12 @@ export function App() {
             </Button>
             <Button
               onClick={() => {
+                avatar.enableMicrophone();
+              }}>
+              Enable Microphone
+            </Button>
+            <Button
+              onClick={() => {
                 avatar.setMessagesHistory([
                   {
                     role: 'system',
@@ -107,7 +113,6 @@ export function App() {
           <Button
             onClick={async () => {
               await avatar.connect();
-              avatar.enableMicrophone();
               setIsConnected(true);
             }}>
             Connect
