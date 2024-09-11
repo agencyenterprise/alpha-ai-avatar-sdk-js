@@ -76,6 +76,12 @@ export function App() {
             </Button>
             <Button
               onClick={() => {
+                avatar.enableMicrophone();
+              }}>
+              Enable Microphone
+            </Button>
+            <Button
+              onClick={() => {
                 avatar.disconnect();
                 setIsConnected(false);
               }}>
@@ -86,7 +92,6 @@ export function App() {
           <Button
             onClick={async () => {
               await avatar.connect();
-              avatar.enableMicrophone();
               setIsConnected(true);
             }}>
             Connect
