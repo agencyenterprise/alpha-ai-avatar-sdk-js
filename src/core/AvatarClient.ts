@@ -12,7 +12,8 @@ import {
   ParsedMessage,
   Prompt,
   VideoPlayerConfig,
-  SayOptions,
+  SynthesizerOptions,
+  AvatarAction,
 } from './types';
 import { VideoPlayer } from './VideoPlayer';
 
@@ -23,6 +24,7 @@ export class AvatarClient extends HTTPClient {
   private avatarsAvailable: Avatars = [];
   private conversational: boolean = false;
   private initialPrompt?: Prompt[];
+  private synthesizeOptions?: SynthesizerOptions;
 
   private audioElement?: HTMLAudioElement;
   private _videoPlayer?: VideoPlayer;
@@ -35,6 +37,7 @@ export class AvatarClient extends HTTPClient {
     this.avatarId = config.avatarId;
     this.conversational = config.conversational ?? false;
     this.initialPrompt = config.initialPrompt;
+    this.synthesizeOptions = config.synthesizerOptions;
     this.eventEmitter = new EventEmitter();
   }
 
@@ -53,6 +56,7 @@ export class AvatarClient extends HTTPClient {
       avatarId: avatarId ?? this.avatarId,
       conversational: this.conversational,
       initialPrompt: this.initialPrompt,
+      synthesizeOptions: this.synthesizeOptions,
     });
     const room = new Room({ adaptiveStream: true });
     this.room = room;
@@ -87,13 +91,24 @@ export class AvatarClient extends HTTPClient {
     return this.get<GetSupportedVoicesResponse>('/supported-voices');
   }
 
-  say(message: string, options?: SayOptions) {
+  say(message: string, options?: SynthesizerOptions) {
     this.sendMessage({ message, ...options });
   }
 
   stop() {
     this.isAvatarSpeaking = false;
-    this.sendMessage({ message: '', avatarAction: 1 });
+    this.sendMessage({ message: '', avatarAction: AvatarAction.STOP });
+  }
+
+  setMessagesHistory(messages: Prompt[]) {
+    this.sendMessage({ AvatarAction: AvatarAction.UPDATE_MESSAGES, messages });
+  }
+
+  setSynthesizerOptions(config: SynthesizerOptions) {
+    this.sendMessage({
+      avatarAction: AvatarAction.UPDATE_SYNTHESIZER_OPTIONS,
+      ...config,
+    });
   }
 
   switchAvatar(avatarId: number) {
@@ -113,9 +128,7 @@ export class AvatarClient extends HTTPClient {
   async enableMicrophone() {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (this.isConnected) {
-        this.room?.localParticipant?.setMicrophoneEnabled(true);
-      }
+      this.room?.localParticipant?.setMicrophoneEnabled(true);
     } catch (error) {
       console.error('Error enabling conversational mode:', error);
     }

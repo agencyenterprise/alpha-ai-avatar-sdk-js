@@ -122,7 +122,7 @@ useEffect(() => {
 
 ## Methods:
 
-#### `avatarClient.say(message: string, options: SayOptions = {})`
+#### `avatarClient.say(message: string, options: SynthesizerOptions = {})`
 
 - This method is used to make the avatar speak.
 - This method adds each message to a queue and plays them one by one, this is designed so you can stack multiple messages in a text-stream situation since shorter chunks are better for latency.
@@ -135,7 +135,7 @@ avatarClient.say("Hello, I'm an AI Avatar!");
 - See section "Customizing Voice, Prosody & SSML" for more details
 
 ```jsx
-type SayOptions = {
+type SynthesizerOptions = {
   voiceName?: string;
   voiceStyle?: string;
   multilingualLang?: string; // e.g. 'en-US', 'es-ES', 'fr-FR'

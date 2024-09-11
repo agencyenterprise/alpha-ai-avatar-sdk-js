@@ -3,7 +3,7 @@ import { Button } from './Button';
 import { useEffect, useRef, useState } from 'react';
 
 const avatar = new AvatarClient({
-  apiKey: 'API_KEY',
+    apiKey: 'API_KEY',
   conversational: true,
   initialPrompt: [
     {
@@ -73,6 +73,27 @@ export function App() {
                 setIsConnected(true);
               }}>
               Switch
+            </Button>
+            <Button
+              onClick={() => {
+                avatar.setMessagesHistory([
+                  {
+                    role: 'system',
+                    content: 'Act like Cleoprata',
+                  },
+                ]);
+              }}>
+              Switch prompt
+            </Button>
+            <Button
+              onClick={() => {
+                avatar.setSynthesizerOptions({
+                  voiceName: 'en-US-AndrewMultilingualNeural',
+                  voiceStyle: 'default',
+                  multilingualLang: 'en',
+                });
+              }}>
+              Switch voice
             </Button>
             <Button
               onClick={() => {
