@@ -7,6 +7,7 @@ export declare type AvatarClientConfig = {
   landmarks?: boolean;
   conversational?: boolean;
   initialPrompt?: Prompt[];
+  synthesizerOptions?: SynthesizerOptions;
 };
 
 export declare type Avatars = {
@@ -29,7 +30,7 @@ export declare type GetSupportedVoicesResponse = {
   wordsPerMinute: string;
 }[];
 
-export declare type SayOptions = {
+export declare type SynthesizerOptions = {
   voiceName?: string;
   voiceStyle?: string;
   multilingualLang?: string;
@@ -167,6 +168,12 @@ export type VideoPlayerLayer = {
   height: number;
   width: number;
 };
+
+export enum AvatarAction {
+  STOP = 1,
+  UPDATE_MESSAGES = 2,
+  UPDATE_SYNTHESIZER_OPTIONS = 3,
+}
 
 export type AvatarAttribute = {
   image: HTMLImageElement;

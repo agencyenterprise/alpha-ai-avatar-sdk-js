@@ -29,7 +29,7 @@ export declare type GetSupportedVoicesResponse = {
   wordsPerMinute: string;
 }[];
 
-export declare type SayOptions = {
+export declare type SynthesizerOptions = {
   voiceName?: string;
   voiceStyle?: string;
   multilingualLang?: string;
@@ -70,7 +70,7 @@ export class AvatarClient extends HTTPClient {
     return this.get<GetSupportedVoicesResponse>('/supported-voices');
   }
 
-  say(message: string, options?: SayOptions) {
+  say(message: string, options?: SynthesizerOptions) {
     this.sendMessage({ message, ...options });
   }
 
