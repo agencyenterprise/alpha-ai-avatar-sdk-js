@@ -101,7 +101,10 @@ export class AvatarClient extends HTTPClient {
   }
 
   setMessagesHistory(messages: Prompt[]) {
-    this.sendMessage({ AvatarAction: AvatarAction.UPDATE_MESSAGES, messages });
+    this.sendMessage({
+      AvatarAction: AvatarAction.UPDATE_MESSAGES,
+      promptMessages: messages,
+    });
   }
 
   setSynthesizerOptions(options: SynthesizerOptions) {
