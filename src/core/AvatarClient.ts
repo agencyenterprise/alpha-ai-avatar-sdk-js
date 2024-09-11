@@ -104,10 +104,10 @@ export class AvatarClient extends HTTPClient {
     this.sendMessage({ AvatarAction: AvatarAction.UPDATE_MESSAGES, messages });
   }
 
-  setSynthesizerOptions(config: SynthesizerOptions) {
+  setSynthesizerOptions(options: SynthesizerOptions) {
     this.sendMessage({
       avatarAction: AvatarAction.UPDATE_SYNTHESIZER_OPTIONS,
-      ...config,
+      ...options,
     });
   }
 
