@@ -48,9 +48,25 @@ export class VideoPlayer {
 
     /**
      * The browser only renders the video if it's attached to the DOM.
+     * To avoid overflowing the content, we attach the video to an iframe, where we can resize to the minimum size.
      */
-    document.body.appendChild(this.inputVideoElement).style.visibility =
-      'hidden';
+    const iframe = document.createElement('iframe');
+
+    iframe.style.visibility = 'hidden';
+    iframe.style.width = '24px';
+    iframe.style.height = '24px';
+    iframe.style.zIndex = '-1';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+
+    if (iframeDoc) {
+      iframeDoc.body.appendChild(this.inputVideoElement);
+    }
 
     this.renderCanvas().then(() => {
       config.videoTrack?.attach(this.inputVideoElement);
