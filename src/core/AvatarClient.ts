@@ -81,9 +81,9 @@ export class AvatarClient extends HTTPClient {
     const room = new Room({ adaptiveStream: true });
     this.room = room;
 
-    room.prepareConnection(serverUrl, token);
+    await room.prepareConnection(serverUrl, token);
     this.setupRoomListeners();
-    room.connect(serverUrl, token);
+    await room.connect(serverUrl, token);
     return room;
   }
 
