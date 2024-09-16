@@ -8,7 +8,7 @@ import {
 const VALID_VIDEOS_EXT = ['mp4', 'webm', 'ogg', 'avi', 'mov'];
 const VALID_IMAGES_EXT = ['jpg', 'jpeg', 'png', 'gif'];
 const GREEN_SCALE_LOW: [number, number, number] = [0, 165, 0];
-const GREEN_SCALE_HIGH: [number, number, number] = [180, 255, 180];
+const GREEN_SCALE_HIGH: [number, number, number] = [80, 255, 80];
 
 const DEFAULT_RESOLUTION = 512;
 
