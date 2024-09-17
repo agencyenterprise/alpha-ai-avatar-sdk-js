@@ -39,10 +39,12 @@ export class AvatarClient extends HTTPClient {
 
   private currentLandmarks: Landmarks = [];
   private targetLandmarks: Landmarks = [];
+  private previousLandmarks: Landmarks = [];
   private lerpFactor: number = 0.1;
   private isLerpingActive: boolean = false;
   private animationFrameId: number | null = null;
   private readonly LERP_THRESHOLD: number = 0.001;
+  private readonly MAX_DISTANCE_THRESHOLD: number = 20;
 
   private attributes: Map<string, AvatarAttribute> = new Map();
   private eventEmitter: EventEmitter;
@@ -329,17 +331,51 @@ export class AvatarClient extends HTTPClient {
 
     if (message.type === MessageType.Landmarks) {
       const newLandmarks = JSON.parse(message.data.message) as Landmarks;
-      this.targetLandmarks = newLandmarks;
+      this.targetLandmarks = this.processLandmarks(newLandmarks);
 
       if (this.currentLandmarks.length === 0) {
-        this.currentLandmarks = JSON.parse(JSON.stringify(newLandmarks));
-        this.eventEmitter.emit('landmarks', {
-          state: MessageState.Active,
-          message: this.currentLandmarks,
-        });
+        this.currentLandmarks = JSON.parse(
+          JSON.stringify(this.targetLandmarks),
+        );
+        this.emitLandmarks(this.currentLandmarks);
       }
       this.startLerping();
     }
+  }
+
+  private processLandmarks(newLandmarks: Landmarks): Landmarks {
+    if (this.previousLandmarks.length === 0) {
+      this.previousLandmarks = newLandmarks;
+      return newLandmarks;
+    }
+
+    const processedLandmarks: Landmarks = newLandmarks.map(
+      (newLandmark, index) => {
+        const prevLandmark = this.previousLandmarks[index];
+        if (!prevLandmark) return newLandmark;
+
+        const distance = this.calculateDistance(newLandmark, prevLandmark);
+
+        if (distance > this.MAX_DISTANCE_THRESHOLD) {
+          return { x: prevLandmark.x, y: prevLandmark.y };
+        }
+
+        return newLandmark;
+      },
+    );
+
+    this.previousLandmarks = processedLandmarks;
+    return processedLandmarks;
+  }
+
+  private calculateDistance(
+    landmark1: { x: number; y: number },
+    landmark2: { x: number; y: number },
+  ): number {
+    return Math.sqrt(
+      Math.pow(landmark1.x - landmark2.x, 2) +
+        Math.pow(landmark1.y - landmark2.y, 2),
+    );
   }
 
   private updateAndEmitLerpedLandmarks() {
@@ -351,35 +387,42 @@ export class AvatarClient extends HTTPClient {
     }
 
     let hasChanged = false;
-    const newLandmarks: Landmarks = new Array(this.currentLandmarks.length);
+    const newLandmarks: Landmarks = [];
 
     for (let i = 0; i < this.currentLandmarks.length; i++) {
       const current = this.currentLandmarks[i];
       const target = this.targetLandmarks[i];
 
       if (!current || !target) {
+        newLandmarks.push(current || { x: 0, y: 0 });
         continue;
       }
 
       const newX = this.lerp(current.x, target.x);
       const newY = this.lerp(current.y, target.y);
 
+      const distance = this.calculateDistance({ x: newX, y: newY }, current);
+
+      let newLandmark: { x: number; y: number };
+      if (distance > this.MAX_DISTANCE_THRESHOLD) {
+        newLandmark = { x: current.x, y: current.y };
+      } else {
+        newLandmark = { x: newX, y: newY };
+      }
+
+      newLandmarks.push(newLandmark);
+
       if (
-        Math.abs(newX - current.x) > this.LERP_THRESHOLD ||
-        Math.abs(newY - current.y) > this.LERP_THRESHOLD
+        Math.abs(newLandmark.x - current.x) > this.LERP_THRESHOLD ||
+        Math.abs(newLandmark.y - current.y) > this.LERP_THRESHOLD
       ) {
         hasChanged = true;
       }
-
-      newLandmarks[i] = { x: newX, y: newY };
     }
 
     if (hasChanged) {
       this.currentLandmarks = newLandmarks;
-      this.eventEmitter.emit('landmarks', {
-        state: MessageState.Active,
-        message: this.currentLandmarks,
-      });
+      this.emitLandmarks(this.currentLandmarks);
       this.drawAttributes(this.currentLandmarks);
       this.animationFrameId = requestAnimationFrame(
         this.updateAndEmitLerpedLandmarks.bind(this),
@@ -387,6 +430,13 @@ export class AvatarClient extends HTTPClient {
     } else {
       this.stopLerping();
     }
+  }
+
+  private emitLandmarks(landmarks: Landmarks) {
+    this.eventEmitter.emit('landmarks', {
+      state: MessageState.Active,
+      message: landmarks,
+    });
   }
 
   private async fetchAvatars() {
