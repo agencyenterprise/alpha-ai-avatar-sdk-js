@@ -38,7 +38,7 @@ export function drawHat(
   const hatWidth = headWidth * 1.2;
   const hatHeight = hatWidth * (image.height / image.width);
   const hatX = topOfHead.x - hatWidth / 2;
-  const hatY = topOfHead.y - hatHeight * 0.8;
+  const hatY = topOfHead.y - hatHeight * 0.88;
 
   ctx.drawImage(image, hatX, hatY, hatWidth, hatHeight);
 }
