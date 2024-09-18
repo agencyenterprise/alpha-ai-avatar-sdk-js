@@ -35,7 +35,7 @@ export function drawHat(
   if (!topOfHead || !leftSideOfHead || !rightSideOfHead) return;
 
   const headWidth = Math.abs(rightSideOfHead.x - leftSideOfHead.x);
-  const hatWidth = headWidth * 1.2;
+  const hatWidth = headWidth * 1.4;
   const hatHeight = hatWidth * (image.height / image.width);
   const hatX = topOfHead.x - hatWidth / 2;
   const hatY = topOfHead.y - hatHeight * 0.88;
@@ -55,7 +55,7 @@ export function drawMustache(
   if (!noseBottom || !leftMouth || !rightMouth) return;
 
   const mouthWidth = Math.abs(rightMouth.x - leftMouth.x);
-  const mustacheWidth = mouthWidth * 1.2;
+  const mustacheWidth = mouthWidth * 1.4;
   const mustacheHeight = mustacheWidth * (image.height / image.width);
   const mustacheX = noseBottom.x - mustacheWidth / 2;
   const mustacheY = noseBottom.y;
