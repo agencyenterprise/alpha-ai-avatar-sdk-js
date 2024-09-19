@@ -1,5 +1,11 @@
 import { EventEmitter } from 'events';
-import { ConnectionState, RemoteTrack, Room, RoomEvent } from 'livekit-client';
+import {
+  ConnectionState,
+  RemoteTrack,
+  Room,
+  RoomEvent,
+  RoomOptions,
+} from 'livekit-client';
 import { HTTPClient } from './HTTPClient';
 import {
   AvatarClientConfig,
@@ -72,7 +78,12 @@ export class AvatarClient extends HTTPClient {
     await this.fetchAvatars();
   }
 
-  async connect(avatarId?: number) {
+  async connect(
+    avatarId?: number,
+    roomOpts: RoomOptions = {
+      adaptiveStream: true,
+    },
+  ) {
     const { serverUrl, token } = await this.post<CreateRoomResponse>('/rooms', {
       avatarId: avatarId ?? this.avatarId,
       landmarks: this.landmarks,
@@ -80,7 +91,7 @@ export class AvatarClient extends HTTPClient {
       initialPrompt: this.initialPrompt,
       synthesizeOptions: this.synthesizeOptions,
     });
-    const room = new Room({ adaptiveStream: true });
+    const room = new Room(roomOpts);
     this.room = room;
 
     await room.prepareConnection(serverUrl, token);

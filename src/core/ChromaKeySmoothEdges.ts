@@ -204,9 +204,14 @@ function featherEdges(
 
         if (bgData) {
           // Blend the foreground with the background based on alphaFactor
-          data[index] = data[index] * alphaFactor + bgData[index] * (1 - alphaFactor);
-          data[index + 1] = data[index + 1] * alphaFactor + bgData[index + 1] * (1 - alphaFactor);
-          data[index + 2] = data[index + 2] * alphaFactor + bgData[index + 2] * (1 - alphaFactor);
+          data[index] =
+            data[index] * alphaFactor + bgData[index] * (1 - alphaFactor);
+          data[index + 1] =
+            data[index + 1] * alphaFactor +
+            bgData[index + 1] * (1 - alphaFactor);
+          data[index + 2] =
+            data[index + 2] * alphaFactor +
+            bgData[index + 2] * (1 - alphaFactor);
           // Optionally adjust alpha channel if needed
           // For non-transparent backgrounds, you might want to keep alpha at 255
           data[index + 3] = 255;
@@ -241,6 +246,14 @@ export function chromaKeySmoothEdges(
   // Step 1: Create initial mask
   let mask = createMask(imageData, greenKeyColor, tolerance);
 
+  const greenScreenDetected = mask.includes(0);
+
+  // If there's no green screen, skip the rest of the processing
+  if (!greenScreenDetected) {
+    ctx.putImageData(imageData, avatarPositionX, avatarPositionY);
+    return;
+  }
+
   // Step 2: Apply erosion multiple times
   for (let i = 0; i < erosionIterations; i++) {
     mask = erodeMask(mask, width, height);
@@ -267,7 +280,11 @@ export function chromaKeySmoothEdges(
 /**
  * Applies the final mask to the image data, setting the alpha channel accordingly.
  */
-function applyMask(imageData: ImageData, mask: Uint8Array, bgData: Uint8ClampedArray | null): void {
+function applyMask(
+  imageData: ImageData,
+  mask: Uint8Array,
+  bgData: Uint8ClampedArray | null,
+): void {
   const data = imageData.data;
   const width = imageData.width;
   const height = imageData.height;
