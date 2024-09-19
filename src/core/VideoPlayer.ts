@@ -1,3 +1,4 @@
+import { chromaKeySmoothEdges } from './ChromaKeySmoothEdges';
 import {
   AvatarVideoConfig,
   AvatarVideoDimension,
@@ -7,8 +8,6 @@ import {
 
 const VALID_VIDEOS_EXT = ['mp4', 'webm', 'ogg', 'avi', 'mov'];
 const VALID_IMAGES_EXT = ['jpg', 'jpeg', 'png', 'gif'];
-const GREEN_SCALE_LOW: [number, number, number] = [0, 165, 0];
-const GREEN_SCALE_HIGH: [number, number, number] = [80, 255, 80];
 
 const DEFAULT_RESOLUTION = 512;
 
@@ -82,9 +81,9 @@ export class VideoPlayer {
     this.canvasContext = this.canvas.getContext('2d', {
       willReadFrequently: true,
     })!;
-    this.videoElement.srcObject = this.canvas.captureStream(30);
     this.videoElement.muted = true;
     this.videoElement.autoplay = true;
+    this.videoElement.srcObject = this.canvas.captureStream(30);
 
     await this.createBackgroundElement();
 
@@ -138,10 +137,10 @@ export class VideoPlayer {
 
     this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const inputRect = this.inputVideoElement.getBoundingClientRect();
+    // const inputRect = this.inputVideoElement.getBoundingClientRect();
 
-    const height = inputRect.height || DEFAULT_RESOLUTION;
-    const width = inputRect.width || DEFAULT_RESOLUTION;
+    const height = DEFAULT_RESOLUTION;
+    const width = DEFAULT_RESOLUTION;
 
     const videoHeight =
       this.avatarConfig.videoHeight === 'auto'
@@ -185,35 +184,17 @@ export class VideoPlayer {
       videoHeight,
     );
 
-    const videoData = videoFrame.data;
-
-    if (bgData) {
-      for (let i = 0; i < videoData.length; i += 4) {
-        const r = videoData[i]!;
-        const g = videoData[i + 1]!;
-        const b = videoData[i + 2]!;
-
-        if (
-          r >= GREEN_SCALE_LOW[0] &&
-          r <= GREEN_SCALE_HIGH[0] &&
-          g >= GREEN_SCALE_LOW[1] &&
-          g <= GREEN_SCALE_HIGH[1] &&
-          b >= GREEN_SCALE_LOW[2] &&
-          b <= GREEN_SCALE_HIGH[2]
-        ) {
-          videoData[i] = bgData[i]!;
-
-          videoData[i + 1] = bgData[i + 1]!;
-          videoData[i + 2] = bgData[i + 2]!;
-          videoData[i + 3] = bgData[i + 3]!;
-        }
-      }
-    }
-
-    this.canvasContext.putImageData(
+    chromaKeySmoothEdges(
+      this.canvasContext,
       videoFrame,
+      { r: 0, g: 255, b: 0 },
+      100,
+      1,
+      1,
+      7,
       this.avatarConfig.videoX,
       this.avatarConfig.videoY,
+      bgData,
     );
 
     for (let i = 0; i < this._layers.length; i++) {
