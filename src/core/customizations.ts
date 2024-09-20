@@ -55,7 +55,7 @@ export function drawMustache(
   if (!noseBottom || !leftMouth || !rightMouth) return;
 
   const mouthWidth = Math.abs(rightMouth.x - leftMouth.x);
-  const mustacheWidth = mouthWidth * 1.4;
+  const mustacheWidth = mouthWidth * 2.3;
   const mustacheHeight = mustacheWidth * (image.height / image.width);
   const mustacheX = noseBottom.x - mustacheWidth / 2;
   const mustacheY = noseBottom.y;
