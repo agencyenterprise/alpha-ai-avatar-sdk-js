@@ -185,3 +185,35 @@ export type AvatarAttribute = {
 };
 
 export type PresetAttribute = 'glasses' | 'hat' | 'mustache';
+
+export type customizationType = 'ACCESSORY' | 'BACKGROUND' | 'VOICE';
+
+export type Customization = {
+  id: number;
+  userId: number;
+  persona: {
+    id: number;
+    avatarId: number;
+    hasGreenScreen: boolean;
+    hasLandmarks: boolean;
+  };
+  userCustomizationItems: {
+    id: number;
+    type: customizationType;
+    item: {
+      id: number;
+      metadata: {
+        accessoryAsset: string;
+        accessorySet: string;
+        azureVoiceName: string;
+        backgroundSet: string;
+        backgroundAsset: string;
+        voiceSet: string;
+        voicePitch: string;
+        voicePreview: string;
+        voiceSpeed: string;
+        voiceStyle: string;
+      };
+    };
+  }[];
+};
