@@ -23,6 +23,7 @@ import {
   Landmarks,
   AvatarAttribute,
   PresetAttribute,
+  Customization,
 } from './types';
 import { VideoPlayer } from './VideoPlayer';
 import { drawGlasses, drawHat, drawMustache } from './customizations';
@@ -55,6 +56,8 @@ export class AvatarClient extends HTTPClient {
   private attributes: Map<string, AvatarAttribute> = new Map();
   private eventEmitter: EventEmitter;
 
+  private customPreset?: Customization;
+
   constructor(config: AvatarClientConfig) {
     super(config.baseUrl ?? 'https://avatar.alpha.school', config.apiKey);
     this.avatarId = config.avatarId;
@@ -74,18 +77,32 @@ export class AvatarClient extends HTTPClient {
     this.videoPlayerConfig = videoPlayerConfig;
     this.canvas = canvas ?? null;
     this.ctx = canvas?.getContext('2d') ?? null;
-
     await this.fetchAvatars();
   }
 
   async connect(
     avatarId?: number,
-    roomOpts: RoomOptions = {
+    roomOpts: RoomOptions & { email?: string } = {
       adaptiveStream: true,
     },
   ) {
+    if (roomOpts.email) {
+      this.customPreset = (await this.get(
+        `/users/${roomOpts.email}/customization`,
+      )) as Customization;
+    }
+
+    let customAvatar: number | undefined;
+    if (
+      this.customPreset &&
+      this.customPreset.persona.avatarId &&
+      this.customPreset.persona.avatarId > 0
+    ) {
+      customAvatar = this.customPreset.persona.avatarId;
+    }
+
     const { serverUrl, token } = await this.post<CreateRoomResponse>('/rooms', {
-      avatarId: avatarId ?? this.avatarId,
+      avatarId: avatarId ?? customAvatar ?? this.avatarId,
       landmarks: this.landmarks,
       conversational: this.conversational,
       initialPrompt: this.initialPrompt,
@@ -229,6 +246,35 @@ export class AvatarClient extends HTTPClient {
     this.room = undefined;
   }
 
+  private loadPresetAttributes() {
+    if (
+      this.customPreset &&
+      this.customPreset.userCustomizationItems.length > 0
+    ) {
+      this.customPreset.userCustomizationItems.forEach(async (data) => {
+        if (!data.item.metadata) return;
+
+        if (data.type === 'BACKGROUND') {
+          this.videoPlayer?.setBackground(data.item.metadata.backgroundAsset);
+        } else if (data.type === 'ACCESSORY') {
+          await this.addAttribute(
+            data.item.metadata.accessorySet,
+            data.item.metadata.accessoryAsset,
+          );
+        } else if (data.type === 'VOICE') {
+          this.setSynthesizerOptions({
+            voiceName: data.item.metadata.azureVoiceName,
+            voiceStyle: data.item.metadata.voiceStyle,
+            prosody: {
+              pitch: data.item.metadata.voicePitch,
+              rate: data.item.metadata.voiceSpeed,
+            },
+          });
+        }
+      });
+    }
+  }
+
   private lerp(start: number, end: number): number {
     return start + (end - start) * this.lerpFactor;
   }
@@ -309,6 +355,7 @@ export class AvatarClient extends HTTPClient {
     if (track.kind === 'video' && this.videoPlayerConfig?.videoElement) {
       this.videoPlayerConfig.videoTrack = track;
       this._videoPlayer = new VideoPlayer(this.videoPlayerConfig);
+      this.loadPresetAttributes();
     } else if (track.kind === 'audio' && this.audioElement) {
       track.attach(this.audioElement);
     }
