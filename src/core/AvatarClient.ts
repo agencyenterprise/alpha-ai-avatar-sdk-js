@@ -246,10 +246,10 @@ export class AvatarClient extends HTTPClient {
     this.room = undefined;
   }
 
-  private loadPresetAttributes() {
+  loadPresetAttributes() {
     if (
       this.customPreset &&
-      this.customPreset.userCustomizationItems.length > 0
+      this.customPreset.userCustomizationItems?.length > 0
     ) {
       this.customPreset.userCustomizationItems.forEach(async (data) => {
         if (!data.item.metadata) return;
