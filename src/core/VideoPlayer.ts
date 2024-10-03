@@ -20,6 +20,7 @@ export class VideoPlayer {
   private backgroundElement?: HTMLImageElement | HTMLVideoElement;
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
+  private videoIframe?: HTMLIFrameElement;
 
   private avatarConfig: AvatarVideoConfig = {
     videoX: 0,
@@ -49,19 +50,21 @@ export class VideoPlayer {
      * The browser only renders the video if it's attached to the DOM.
      * To avoid overflowing the content, we attach the video to an iframe, where we can resize to the minimum size.
      */
-    const iframe = document.createElement('iframe');
+    this.videoIframe = document.createElement('iframe');
 
-    iframe.style.visibility = 'hidden';
-    iframe.style.width = '24px';
-    iframe.style.height = '24px';
-    iframe.style.zIndex = '-1';
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
+    this.videoIframe.style.visibility = 'hidden';
+    this.videoIframe.style.width = '24px';
+    this.videoIframe.style.height = '24px';
+    this.videoIframe.style.zIndex = '-1';
+    this.videoIframe.style.position = 'absolute';
+    this.videoIframe.style.top = '0';
+    this.videoIframe.style.left = '0';
 
-    document.body.appendChild(iframe);
+    document.body.appendChild(this.videoIframe);
 
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    const iframeDoc =
+      this.videoIframe.contentDocument ||
+      this.videoIframe.contentWindow?.document;
 
     if (iframeDoc) {
       iframeDoc.body.appendChild(this.inputVideoElement);
@@ -137,10 +140,9 @@ export class VideoPlayer {
 
     this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // const inputRect = this.inputVideoElement.getBoundingClientRect();
-
-    const height = DEFAULT_RESOLUTION;
-    const width = DEFAULT_RESOLUTION;
+    const inputRect = this.inputVideoElement.getBoundingClientRect();
+    const height = inputRect.width || DEFAULT_RESOLUTION;
+    const width = inputRect.width || DEFAULT_RESOLUTION;
 
     const videoHeight =
       this.avatarConfig.videoHeight === 'auto'
@@ -283,6 +285,7 @@ export class VideoPlayer {
   public destroy() {
     this.inputVideoElement?.remove();
     this.backgroundElement?.remove();
+    this.videoIframe?.remove();
     this.canvas?.remove();
     this._layers = [];
   }
