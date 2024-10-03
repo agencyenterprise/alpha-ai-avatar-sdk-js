@@ -47,11 +47,11 @@ export class AvatarClient extends HTTPClient {
   private currentLandmarks: Landmarks = [];
   private targetLandmarks: Landmarks = [];
   private previousLandmarks: Landmarks = [];
-  private lerpFactor: number = 0.1;
+  private lerpFactor: number = 0.07;
   private isLerpingActive: boolean = false;
   private animationFrameId: number | null = null;
-  private readonly LERP_THRESHOLD: number = 0.001;
-  private readonly MAX_DISTANCE_THRESHOLD: number = 20;
+  private readonly LERP_THRESHOLD: number = 0.01;
+  private readonly MAX_DISTANCE_THRESHOLD: number = 70;
 
   private attributes: Map<string, AvatarAttribute> = new Map();
   private eventEmitter: EventEmitter;
