@@ -82,7 +82,7 @@ export class AvatarClient extends HTTPClient {
 
   async connect(
     avatarId?: number,
-    roomOpts: RoomOptions & { email?: string } = {
+    roomOpts: RoomOptions & Omit<AvatarClientConfig, 'apiKey'> = {
       adaptiveStream: true,
     },
   ) {
@@ -103,10 +103,10 @@ export class AvatarClient extends HTTPClient {
 
     const { serverUrl, token } = await this.post<CreateRoomResponse>('/rooms', {
       avatarId: avatarId ?? customAvatar ?? this.avatarId,
-      landmarks: this.landmarks,
-      conversational: this.conversational,
-      initialPrompt: this.initialPrompt,
-      synthesizeOptions: this.synthesizeOptions,
+      landmarks: roomOpts.landmarks ?? this.landmarks ?? false,
+      conversational: roomOpts.conversational ?? this.conversational ?? false,
+      initialPrompt: roomOpts.initialPrompt ?? this.initialPrompt,
+      synthesizeOptions: roomOpts.synthesizerOptions ?? this.synthesizeOptions,
     });
     const room = new Room(roomOpts);
     this.room = room;

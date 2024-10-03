@@ -8,6 +8,7 @@ export declare type AvatarClientConfig = {
   conversational?: boolean;
   initialPrompt?: Prompt[];
   synthesizerOptions?: SynthesizerOptions;
+  email?: string;
 };
 
 export declare type Avatars = {
