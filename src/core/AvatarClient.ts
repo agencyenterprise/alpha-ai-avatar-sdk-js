@@ -364,6 +364,8 @@ export class AvatarClient extends HTTPClient {
   private handleTrackUnsubscribed(track: RemoteTrack) {
     track.detach();
 
+    this.destroyEmitter();
+
     if (track.kind === 'video') {
       this._videoPlayer?.destroy();
     }
@@ -495,6 +497,10 @@ export class AvatarClient extends HTTPClient {
       state: MessageState.Active,
       message: landmarks,
     });
+  }
+
+  private destroyEmitter() {
+    this.eventEmitter.removeAllListeners();
   }
 
   private async fetchAvatars() {
