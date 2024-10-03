@@ -189,7 +189,7 @@ export class VideoPlayer {
       videoFrame,
       { r: 0, g: 255, b: 0 },
       100,
-      2,
+      1,
       2,
       7,
       this.avatarConfig.videoX,
