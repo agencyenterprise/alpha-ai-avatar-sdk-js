@@ -15,8 +15,8 @@ function createMask(
   tolerance: number,
 ): Uint8Array {
   const data = imageData.data;
-  const width = imageData.width;
-  const height = imageData.height;
+  const width = 512;
+  const height = 512;
   const mask = new Uint8Array(width * height);
 
   for (let y = 0; y < height; y++) {
@@ -44,6 +44,95 @@ function createMask(
   }
 
   return mask;
+}
+
+function createSmoothedMask(
+  imageData: ImageData,
+  greenKeyColor: RGBColor,
+  tolerance: number,
+  smoothingKernelSize: number,
+): Uint8Array {
+  const data = imageData.data;
+  const width = 512;
+  const height = 512;
+  const mask = new Uint8Array(width * height);
+
+  // Create the initial mask
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = (y * width + x) * 4;
+      const r = data[index];
+      const g = data[index + 1];
+      const b = data[index + 2];
+      // Calculate distance from the green key color
+      const distance = Math.sqrt(
+        (r - greenKeyColor.r) ** 2 +
+        (g - greenKeyColor.g) ** 2 +
+        (b - greenKeyColor.b) ** 2,
+      );
+      if (distance < tolerance) {
+        // Greenscreen pixel
+        mask[y * width + x] = 0; // Background
+      } else {
+        // Subject pixel
+        mask[y * width + x] = 1; // Foreground
+      }
+    }
+  }
+
+  // Apply smoothing to the mask
+  const smoothedMask = smoothMaskWithGaussian(mask, width, height, 1);
+
+  return smoothedMask;
+}
+
+function smoothMaskWithGaussian(mask: Uint8Array, width: number, height: number, sigma: number = 1): Uint8Array {
+  const newMask = new Uint8Array(width * height);
+  const kernelRadius = Math.ceil(sigma * 3);
+  const kernelSize = 2 * kernelRadius + 1;
+
+  // Generate Gaussian kernel
+  const kernel = [];
+  let sum = 0;
+  for (let y = -kernelRadius; y <= kernelRadius; y++) {
+    for (let x = -kernelRadius; x <= kernelRadius; x++) {
+      const exponent = -(x * x + y * y) / (2 * sigma * sigma);
+      const value = Math.exp(exponent);
+      kernel.push(value);
+      sum += value;
+    }
+  }
+  // Normalize the kernel so that the sum of all weights is 1
+  for (let i = 0; i < kernel.length; i++) {
+    kernel[i] /= sum;
+  }
+
+  // Function to get the pixel value with boundary checks
+  function getPixel(x: number, y: number): number {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+      return 0; // Treat out-of-bound pixels as background (0)
+    }
+    return mask[y * width + x];
+  }
+
+  // Convolve the mask with the Gaussian kernel
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let accumulator = 0;
+      let index = 0;
+      for (let ky = -kernelRadius; ky <= kernelRadius; ky++) {
+        for (let kx = -kernelRadius; kx <= kernelRadius; kx++) {
+          const pixel = getPixel(x + kx, y + ky);
+          const weight = kernel[index++];
+          accumulator += pixel * weight;
+        }
+      }
+      // Threshold the accumulator to create a binary mask
+      newMask[y * width + x] = accumulator >= 0.5 ? 1 : 0;
+    }
+  }
+
+  return newMask;
 }
 
 /**
@@ -190,8 +279,8 @@ function featherEdges(
   bgData: Uint8ClampedArray | null = null, // Added bgData as an optional parameter
 ): void {
   const data = imageData.data;
-  const width = imageData.width;
-  const height = imageData.height;
+  const width = 512;
+  const height = 512;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -240,8 +329,8 @@ export function chromaKeySmoothEdges(
   avatarPositionY: number,
   bgData: Uint8ClampedArray | null = null,
 ): void {
-  const width = imageData.width;
-  const height = imageData.height;
+  const width = 512;
+  const height = 512;
 
   // Step 1: Create initial mask
   let mask = createMask(imageData, greenKeyColor, tolerance);
@@ -255,14 +344,14 @@ export function chromaKeySmoothEdges(
   }
 
   // Step 2: Apply erosion multiple times
-  for (let i = 0; i < erosionIterations; i++) {
-    mask = erodeMask(mask, width, height);
-  }
+  // for (let i = 0; i < erosionIterations; i++) {
+  //   mask = erodeMask(mask, width, height);
+  // }
 
   // Step 3: Apply dilation multiple times
-  for (let i = 0; i < dilationIterations; i++) {
-    mask = dilateMask(mask, width, height);
-  }
+  // for (let i = 0; i < dilationIterations; i++) {
+  //   mask = dilateMask(mask, width, height);
+  // }
 
   // Step 4: Compute distance transform
   const distanceMap = computeDistanceTransform(mask, width, height);
@@ -286,8 +375,8 @@ function applyMask(
   bgData: Uint8ClampedArray | null,
 ): void {
   const data = imageData.data;
-  const width = imageData.width;
-  const height = imageData.height;
+  const width = 512;
+  const height = 512;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
