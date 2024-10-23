@@ -169,9 +169,11 @@ export class AvatarClient extends HTTPClient {
   }
 
   switchAvatar(avatarId: number) {
-    this.disconnect();
-    this.avatarId = avatarId;
-    return this.connect(avatarId);
+    this.sendMessage({
+      avatarAction: AvatarAction.UPDATE_AVATAR_VERSION,
+      message: '',
+      avatarId,
+    });
   }
 
   addEventListener(eventName: string, listener: (...args: any[]) => void) {
