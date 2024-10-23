@@ -56,7 +56,7 @@ export class VideoPlayer {
     this.videoIframe.style.width = '24px';
     this.videoIframe.style.height = '24px';
     this.videoIframe.style.zIndex = '-1';
-    this.videoIframe.style.position = 'absolute';
+    this.videoIframe.style.position = 'fixed';
     this.videoIframe.style.top = '0';
     this.videoIframe.style.left = '0';
 
