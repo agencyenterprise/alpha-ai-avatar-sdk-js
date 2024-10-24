@@ -176,6 +176,13 @@ export class AvatarClient extends HTTPClient {
     });
   }
 
+  sendConversationalMessage(message: any) {
+    this.sendMessage({
+      avatarAction: AvatarAction.SEND_CONVERSATIONAL_MESSAGE,
+      message,
+    });
+  }
+
   addEventListener(eventName: string, listener: (...args: any[]) => void) {
     this.eventEmitter.on(eventName, listener);
   }

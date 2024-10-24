@@ -175,6 +175,7 @@ export enum AvatarAction {
   UPDATE_MESSAGES = 2,
   UPDATE_SYNTHESIZER_OPTIONS = 3,
   UPDATE_AVATAR_VERSION = 4,
+  SEND_CONVERSATIONAL_MESSAGE = 5,
 }
 
 export type AvatarAttribute = {
