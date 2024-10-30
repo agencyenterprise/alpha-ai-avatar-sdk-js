@@ -284,6 +284,26 @@ export class AvatarClient extends HTTPClient {
     }
   }
 
+  generateAvatarVideo({
+    image,
+    text,
+    voiceId,
+  }: {
+    image: string;
+    text: string;
+    voiceId: string;
+  }) {
+    return this.post('/generate-avatar-video', {
+      image,
+      text,
+      voiceId,
+    });
+  }
+
+  getAvatarVideoStatus(id: string) {
+    return this.get(`/generate-avatar-video/${id}/status`);
+  }
+
   private lerp(start: number, end: number): number {
     return start + (end - start) * this.lerpFactor;
   }
