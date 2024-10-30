@@ -284,7 +284,7 @@ export class AvatarClient extends HTTPClient {
     }
   }
 
-  generateAvatar({
+  generateAvatarVideo({
     image,
     text,
     voiceId,
@@ -293,15 +293,15 @@ export class AvatarClient extends HTTPClient {
     text: string;
     voiceId: string;
   }) {
-    return this.post('/generate-avatar', {
+    return this.post('/generate-avatar-video', {
       image,
       text,
       voiceId,
     });
   }
 
-  generateAvatarStatus(id: string) {
-    return this.get(`/generate-avatar/${id}/status`);
+  getAvatarVideoStatus(id: string) {
+    return this.get(`/generate-avatar-video/${id}/status`);
   }
 
   private lerp(start: number, end: number): number {
